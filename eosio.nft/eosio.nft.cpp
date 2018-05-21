@@ -2,8 +2,8 @@
  *  @file
  *  @copyright defined in eos/LICENSE.txt
  */
-
-#include <eosio.nft/eosio.nft.hpp>
+#include <eosiolib/eosio.hpp>
+#include "eosio.nft.hpp"
 
 namespace eosio {
     using std::string;
@@ -15,7 +15,7 @@ namespace eosio {
         require_auth( owner );
 
         // Generate unique token
-        uint64_t unique_key = available_primary_key owner ^ murmur_hash(tapos_block_num());
+        uint64_t unique_key = generate_unique_id(owner, tapos_block_prefix());//available_primary_key owner ^ murmur_hash(tapos_block_prefix());
 
         // DEBUG
         print(unique_key);

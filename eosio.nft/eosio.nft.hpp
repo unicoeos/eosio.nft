@@ -6,7 +6,7 @@
 
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/transaction.hpp>
-
+#include <chrono>
 #include <string>
 
 namespace eosiosystem {
@@ -37,21 +37,21 @@ namespace eosio {
              string         uri; // RFC 3986
              account_name   owner;
 
-             uint64_t primary_key()const { return id; }
-             account_name get_owner()const { return owner; }
+             uint64_t primary_key() const { return id; }
+             account_name get_owner() const { return owner; }
 
              EOSLIB_SERIALIZE( token, (id)(uri)(owner) )
          };
 
          typedef eosio::multi_index<N(tokens), token,
-                        indexed_by< N(byowner), const_mem_fun<token, account_name, &token::get_owner> > tokens;
+                        indexed_by< N(byowner), const_mem_fun<token, account_name, &token::get_owner> > > tokens;
 
-         inline token get_balance( account_name owner )const;
+         inline token get_balance( account_name owner) const;
    };
 
 
-    /*
-    token NFT::get_balance( account_name owner )const
+    
+   /* token NFT::get_balance( account_name owner )const
     {
         // Ensure 'owner' account exists
         eosio_assert( is_account( owner ), "owner account does not exist");
@@ -62,11 +62,29 @@ namespace eosio {
 
         // Ensure token exists
         return tokens_table;
-    }
-    */
+    }*/
+    
 
-   inline static uint64_t murmur_hash( const int& key ){
+   /*inline static uint64_t murmur_hash( const int& key ){
        return std::hash<int>{}(key);
+   }*/
+
+   inline static uint64_t generate_unique_id( account_name owner, int tapos_prefix ){
+	
+	uint32_t accHash = std::hash<account_name>{}(owner);
+		
+	uint32_t taposHash = std::hash<int>{}(tapos_prefix);
+	uint32_t accTaposXOR = accHash ^ taposHash;
+		
+	std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();  
+	
+	uint32_t timeHash = std::hash<uint64_t>{}(now.time_since_epoch().count()); 
+	uint32_t accTimeXOR = accHash ^ timeHash;
+
+	uint64_t accTaposXOR64 = static_cast<uint64_t>(accTaposXOR);
+	uint64_t accTimeXOR64 = static_cast<uint64_t>(accTimeXOR);
+	uint64_t resHash = (accTaposXOR64 << 32) | (accTimeXOR64);
+	return resHash;
    }
 
 } /// namespace eosio
