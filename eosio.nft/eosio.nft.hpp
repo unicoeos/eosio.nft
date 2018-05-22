@@ -6,7 +6,6 @@
 
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/transaction.hpp>
-#include <chrono>
 #include <string>
 
 namespace eosiosystem {
@@ -34,13 +33,12 @@ namespace eosio {
         // @abi table token i64
         struct token {
             uint64_t       id;  // Unique 64 bit identifier,
-            string         uri; // RFC 3986
+            string         uri;   // RFC 3986
 
             auto primary_key() const { return id; }
         };
 
         typedef eosio::multi_index<N(tokens), token> tokens;
-          //      indexed_by< N(byowner), const_mem_fun<token, account_name, &token::get_owner> > > tokens;
 
         inline token get_balance( account_name owner) const;
     };
@@ -73,6 +71,10 @@ namespace eosio {
         uint32_t accTaposXOR = accHash ^ taposHash;
 
         uint32_t timeHash = now();
+        print("Time right now() is: ", timeHash, "       ");
+
+        int64_t test = eosio::time_point().elapsed.count();
+        print("Time Hash milliseconds: ", test);
         uint32_t accTimeXOR = accHash ^ timeHash;
 
         uint64_t accTaposXOR64 = static_cast<uint64_t>(accTaposXOR);

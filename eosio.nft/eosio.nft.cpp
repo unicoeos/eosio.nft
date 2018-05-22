@@ -2,7 +2,6 @@
  *  @file
  *  @copyright defined in eos/LICENSE.txt
  */
-#include <eosiolib/eosio.hpp>
 #include "eosio.nft.hpp"
 
 namespace eosio {
@@ -17,18 +16,15 @@ namespace eosio {
         // Generate unique token
         uint64_t unique_key = generate_unique_id(owner, tapos_block_prefix());//available_primary_key owner ^ murmur_hash(tapos_block_prefix());
 
-        // DEBUG
-        print(unique_key);
 
-        // Search for pre-existing token with same ID
+        // Search for pre-existing token with same id
         tokens tokens_table( _self, owner );
         auto itr = tokens_table.find( unique_key );
-        eosio_assert( itr == tokens_table.end(), "token with ID already exists" );
+        eosio_assert( itr == tokens_table.end(), "token with id already exists" );
 
-        tokens_table.emplace( _self, [&]( auto& token ) {
+        tokens_table.emplace( owner, [&]( auto& token ) {
             token.id = unique_key;
             token.uri = uri;
-            //token.owner = owner;
         });
     }
 
@@ -45,25 +41,30 @@ namespace eosio {
         // Ensure 'to' account exists
         eosio_assert( is_account( to ), "to account does not exist");
 
-        // Retrieve table for NFTs
-        tokens tokens_table( _self, from );
+        // Retrieve table for NFTs owned by 'from'
+        tokens sender_tokens( _self, from );
 
-        // Ensure token exists
-        auto existing = tokens_table.find( id );
-        eosio_assert( existing != tokens_table.end(), "token with ID does not exist" );
-        const auto& ut = *existing;
+        // Ensure owner owns token
+        auto token_itr = sender_tokens.find( id );
+        eosio_assert( token_itr != sender_tokens.end(), "sender does not own token with specified ID" );
 
-        // Ensure token owner matches 'from'
-        // eosio_assert( ut.owner == from, "token owner does not match sender" );
+        // Token Object
+        const auto& token_object = *token_itr;
+
+        // Remove token from sender
+        sender_tokens.erase(token_itr);
+
+        // Retrieve table for NFTs owned by 'to'
+        tokens receiver_tokens( _self, to );
+
+        // Add token to receiver
+        receiver_tokens.emplace( from, [&]( auto& token ) {
+            token = token_object;
+        });
 
         // Notify both recipients
         require_recipient( from );
         require_recipient( to );
-
-        // Perform transfer
-        tokens_table.modify( ut, 0, [&]( auto& token ) {
-            // token.owner = to;
-        });
     }
 } /// namespace eosio
 

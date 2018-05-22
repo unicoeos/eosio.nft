@@ -1,1 +1,2 @@
 cleos system newaccount eosio syedalijafri EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV --stake-net "1.0000 SYS" --stake-cpu "1.0000 SYS" --buy-ram-EOS "1.0000 SYS"
+cleos system newaccount eosio eoscalgaryca EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV --stake-net "1.0000 SYS" --stake-cpu "1.0000 SYS" --buy-ram-EOS "1.0000 SYS"

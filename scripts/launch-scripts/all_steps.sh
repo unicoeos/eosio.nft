@@ -41,6 +41,10 @@ printf "\n\n${GREEN}8. Transfer SYS${NC}\n"
 sh ./deployment/8_transfer.sh
 sleep 1
 
-printf "\n\n${GREEN}9. Vote Producer${NC}\n"
-sh ./deployment/9_vote_producer.sh
+printf "\n\n${GREEN}9. Delegate Bandwidth${NC}\n"
+sh ./deployment/9_delegate_bandwidth.sh
+sleep 1
+
+printf "\n\n${GREEN}10. Vote Producer${NC}\n"
+sh ./deployment/10_vote_producer.sh
 sleep 1
