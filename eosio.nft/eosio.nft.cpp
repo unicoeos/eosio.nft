@@ -66,6 +66,18 @@ namespace eosio {
         require_recipient( from );
         require_recipient( to );
     }
+	
+	uint64_t get_balance_of( account_name _owner) const
+	{
+		// Ensure '_owner' account exists
+        eosio_assert( is_account( _owner ), "_owner account does not exist");
+		
+		// Retrieve table for NFTs owned by '_owner'
+        tokens owner_tokens( _self, _owner );
+		
+		uint64_t tokensNumber = static_cast<uint64_t>(owner_tokens.size());
+		return tokensNumber;
+	}
 } /// namespace eosio
 
 EOSIO_ABI( eosio::NFT, (create)(transfer) )

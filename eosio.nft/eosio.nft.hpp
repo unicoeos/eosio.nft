@@ -26,7 +26,27 @@ namespace eosio {
                        account_name to,
                        uint64_t     id,
                        string       memo );
-
+		
+		// returns number of all tokens owned by _owner 
+        uint64_t get_balance_of( account_name _owner) const;
+		
+		// return token owner by token id
+		account_name get_owner_of(uint64_t tokenId) const;
+		
+		// approve ownerhip of the token by tokenId
+		void approve(account_name approved, uint64_t tokenId);
+		
+		// approve ownership of all tokens
+		void set_approval_for_all(account_name account, bool approved);
+		
+		// return approved account of the token
+		void account_name get_approved(uint64_t tokenId) const;
+		
+		// check if the account is approved for all owner tokens 
+		bool is_approved_for_all(account_name owner, account_name account) const;
+		
+		uint64_t total_supply() const;
+		
     private:
         friend eosiosystem::system_contract;
 
@@ -39,8 +59,6 @@ namespace eosio {
         };
 
         typedef eosio::multi_index<N(tokens), token> tokens;
-
-        inline token get_balance( account_name owner) const;
     };
 
 
