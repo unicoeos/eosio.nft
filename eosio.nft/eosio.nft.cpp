@@ -21,22 +21,22 @@ namespace eosio {
         print(unique_key);
 
         // Search for pre-existing token with same ID
-        tokens tokens_table( _self, unique_key );
+        tokens tokens_table( _self, owner );
         auto itr = tokens_table.find( unique_key );
         eosio_assert( itr == tokens_table.end(), "token with ID already exists" );
 
         tokens_table.emplace( _self, [&]( auto& token ) {
-            token.id = tokens_table.available_primary_key();
+            token.id = unique_key;
             token.uri = uri;
-            token.owner = owner;
+            //token.owner = owner;
         });
     }
 
     // @abi action
     void NFT::transfer( account_name from,
-                          account_name to,
-                          uint64_t     id,
-                          string       /*memo*/ )
+                        account_name to,
+                        uint64_t     id,
+                        string       /*memo*/ )
     {
         // Ensure authorized to send from account
         eosio_assert( from != to, "cannot transfer to self" );
@@ -54,7 +54,7 @@ namespace eosio {
         const auto& ut = *existing;
 
         // Ensure token owner matches 'from'
-        eosio_assert( ut.owner == from, "token owner does not match sender" );
+        // eosio_assert( ut.owner == from, "token owner does not match sender" );
 
         // Notify both recipients
         require_recipient( from );
@@ -62,7 +62,7 @@ namespace eosio {
 
         // Perform transfer
         tokens_table.modify( ut, 0, [&]( auto& token ) {
-            token.owner = to;
+            // token.owner = to;
         });
     }
 } /// namespace eosio
