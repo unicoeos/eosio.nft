@@ -25,8 +25,7 @@
       "base": "",
       "fields": [
         {"name":"id", "type":"uint64"},
-        {"name":"uri", "type":"string"},
-        {"name":"owner", "type":"account_name"}
+        {"name":"uri", "type":"string"}
       ]
     }
   ],

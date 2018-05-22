@@ -37,8 +37,6 @@ namespace eosio {
             string         uri; // RFC 3986
 
             auto primary_key() const { return id; }
-
-            EOSLIB_SERIALIZE( token, (id)(uri))
         };
 
         typedef eosio::multi_index<N(tokens), token> tokens;
