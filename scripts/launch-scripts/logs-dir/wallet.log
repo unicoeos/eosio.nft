@@ -1,0 +1,19 @@
+838409ms thread-0   wallet_plugin.cpp:41          plugin_initialize    ] initializing wallet plugin
+838409ms thread-0   http_plugin.cpp:247           plugin_initialize    ] configured http to listen on localhost:8900
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/keosd/stop
+838409ms thread-0   http_plugin.cpp:285           plugin_startup       ] start listening for http requests
+838409ms thread-0   wallet_api_plugin.cpp:74      plugin_startup       ] starting wallet_api_plugin
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/create
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/create_key
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/get_public_keys
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/import_key
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/list_keys
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/list_wallets
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/lock
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/lock_all
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/open
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/set_timeout
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/sign_transaction
+838409ms thread-0   http_plugin.cpp:325           add_handler          ] add api url: /v1/wallet/unlock
+839434ms thread-0   wallet.cpp:199                save_wallet_file     ] saving wallet to file /home/jafri/Desktop/scripts/launch-scripts/./data-dir/./default.wallet
+840494ms thread-0   wallet.cpp:199                save_wallet_file     ] saving wallet to file /home/jafri/Desktop/scripts/launch-scripts/./data-dir/./default.wallet

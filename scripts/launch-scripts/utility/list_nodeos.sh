@@ -1,0 +1,1 @@
+netstat -peanut | grep nodeos
