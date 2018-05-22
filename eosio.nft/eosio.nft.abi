@@ -3,7 +3,7 @@
   "version": "",
   "types": [{
       "new_type_name": "account_name",
-      "type": "uint64"
+      "type": "name"
     }
   ],
   "structs": [{
