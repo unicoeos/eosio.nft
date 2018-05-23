@@ -7,7 +7,7 @@
 namespace eosio {
     using std::string;
 
-	// @abi action
+    // @abi action
     void NFT::create( account_name owner, string uri )
     {
         // Have permission to create token
@@ -29,7 +29,7 @@ namespace eosio {
         });
     }
 
-	// @abi action
+    // @abi action
     void NFT::transfer( account_name from,
                         account_name to,
                         uint64_t     id,
@@ -49,8 +49,7 @@ namespace eosio {
         auto token_itr = sender_tokens.get( id );
         eosio_assert( token_itr != sender_tokens.end(), "sender does not own token with specified ID" );
 
-        // Retrieve table for NFTs owned by 'to'
-        // Add token to receiver
+        // Transfer NFT from sender to receiver
         receiver_tokens.modify( token_itr, from, [&]( auto& token ) {
 	    token.owner = to;
         });
@@ -60,29 +59,29 @@ namespace eosio {
         require_recipient( to );
     }
 	
-	uint64_t NFT::get_balance( account_name _owner) const
-	{
-		// Ensure '_owner' account exists
-        eosio_assert( is_account( _owner ), "_owner account does not exist");
-		
-		// Retrieve table for NFTs owned by '_owner'
-        tokens owner_tokens( _self, _owner );
-		
-		uint64_t tokensNumber = 0;
-		for(auto it=owner_tokens.begin(); it!=owner_tokens.end();++it)
-			tokensNumber++;
-	
-		return tokensNumber;
-	}
+    uint64_t NFT::get_balance( account_name _owner) const
+    {
+	// Ensure '_owner' account exists
+	eosio_assert( is_account( _owner ), "_owner account does not exist");
 
-	account_name NFT::get_owner( uint64_t id ) const
-	{
-		tokens all_tokens ( _self, _self );
-		auto token_itr = all_tokens.find( id );
-                eosio_assert( token_itr != all_tokens.end(), "owner does not exist for token with specified ID" );
-	       
-	        return token_itr->owner;
-	}
+	// Retrieve table for NFTs owned by '_owner'
+	tokens owner_tokens( _self, _owner );
+
+	uint64_t tokensNumber = 0;
+	for(auto it=owner_tokens.begin(); it!=owner_tokens.end();++it)
+		tokensNumber++;
+
+	return tokensNumber;
+    }
+
+    account_name NFT::get_owner( uint64_t id ) const
+    {
+	tokens all_tokens ( _self, _self );
+	auto token_itr = all_tokens.find( id );
+	eosio_assert( token_itr != all_tokens.end(), "owner does not exist for token with specified ID" );
+
+	return token_itr->owner;
+    }
 
 EOSIO_ABI( NFT, (create)(transfer) )
 
