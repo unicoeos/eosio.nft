@@ -7,6 +7,8 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/transaction.hpp>
 #include <string>
+#include <chrono>
+#include <ctime>
 
 namespace eosiosystem {
     class system_contract;
@@ -19,7 +21,7 @@ namespace eosio {
     class NFT : public contract {
     public:
         NFT( account_name self ):contract(self){}
-
+        
         void create( account_name owner, string uri );
 
         void transfer( account_name from,
@@ -28,24 +30,23 @@ namespace eosio {
                        string       memo );
 		
 		// returns number of all tokens owned by _owner 
-        uint64_t get_balance_of( account_name _owner) const;
-		
+	uint64_t balanceOf( account_name _owner) const;	
 		// return token owner by token id
-		account_name get_owner_of(uint64_t tokenId) const;
+		//account_name get_owner_of(uint64_t tokenId) const;
 		
 		// approve ownerhip of the token by tokenId
-		void approve(account_name approved, uint64_t tokenId);
+		//void approve(account_name approved, uint64_t tokenId);
 		
 		// approve ownership of all tokens
-		void set_approval_for_all(account_name account, bool approved);
+		//void set_approval_for_all(account_name account, bool approved);
 		
 		// return approved account of the token
-		void account_name get_approved(uint64_t tokenId) const;
+		//account_name get_approved(uint64_t tokenId) const;
 		
 		// check if the account is approved for all owner tokens 
-		bool is_approved_for_all(account_name owner, account_name account) const;
+		//bool is_approved_for_all(account_name owner, account_name account) const;
 		
-		uint64_t total_supply() const;
+		//uint64_t total_supply() const;
 		
     private:
         friend eosiosystem::system_contract;
@@ -88,11 +89,16 @@ namespace eosio {
         uint32_t taposHash = std::hash<int>{}(tapos_prefix);
         uint32_t accTaposXOR = accHash ^ taposHash;
 
-        uint32_t timeHash = now();
-        print("Time right now() is: ", timeHash, "       ");
+	auto currTime = time(0);//now();
+        auto epochCount = currTime;//currTime.time_since_epoch().count();
+	
+        print("Time right now() is: ", epochCount, "       ");
+       
+	uint32_t timeHash = std::hash<uint64_t>{}(static_cast<uint64_t>(epochCount));
+	print("Time hash is: ", timeHash, "       ");
 
-        int64_t test = eosio::time_point().elapsed.count();
-        print("Time Hash milliseconds: ", test);
+        //int64_t test = eosio::time_point::now();
+        //print("Time Hash milliseconds: ", test);
         uint32_t accTimeXOR = accHash ^ timeHash;
 
         uint64_t accTaposXOR64 = static_cast<uint64_t>(accTaposXOR);
