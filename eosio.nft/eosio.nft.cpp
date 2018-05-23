@@ -7,7 +7,7 @@
 namespace eosio {
     using std::string;
 
-    // @abi action
+	// @abi action
     void NFT::create( account_name owner, string uri )
     {
         // Have permission to create token
@@ -25,10 +25,11 @@ namespace eosio {
         tokens_table.emplace( owner, [&]( auto& token ) {
             token.id = unique_key;
             token.uri = uri;
+	    token.owner = owner;
         });
     }
 
-    // @abi action
+	// @abi action
     void NFT::transfer( account_name from,
                         account_name to,
                         uint64_t     id,
@@ -60,6 +61,7 @@ namespace eosio {
         // Add token to receiver
         receiver_tokens.emplace( from, [&]( auto& token ) {
             token = token_object;
+	    token.owner = to;
         });
 
         // Notify both recipients
@@ -67,7 +69,7 @@ namespace eosio {
         require_recipient( to );
     }
 	
-	uint64_t NFT::balanceOf( account_name _owner) const
+	uint64_t NFT::get_balance( account_name _owner) const
 	{
 		// Ensure '_owner' account exists
         eosio_assert( is_account( _owner ), "_owner account does not exist");
@@ -80,6 +82,15 @@ namespace eosio {
 			tokensNumber++;
 	
 		return tokensNumber;
+	}
+
+	account_name NFT::get_owner( uint64_t id ) const
+	{
+		tokens all_tokens ( _self, _self );
+		auto token_itr = all_tokens.find( id );
+                eosio_assert( token_itr != all_tokens.end(), "owner does not exist for token with specified ID" );
+	       
+	        return token_itr->owner;
 	}
 } /// namespace eosio
 

@@ -30,9 +30,9 @@ namespace eosio {
                        string       memo );
 		
 		// returns number of all tokens owned by _owner 
-	uint64_t balanceOf( account_name _owner) const;	
+	uint64_t get_balance( account_name _owner) const;	
 		// return token owner by token id
-		//account_name get_owner_of(uint64_t tokenId) const;
+	account_name get_owner(uint64_t tokenId) const;
 		
 		// approve ownerhip of the token by tokenId
 		//void approve(account_name approved, uint64_t tokenId);
@@ -55,6 +55,7 @@ namespace eosio {
         struct token {
             uint64_t       id;  // Unique 64 bit identifier,
             string         uri;   // RFC 3986
+	    account_name   owner; // token owner
 
             auto primary_key() const { return id; }
         };
