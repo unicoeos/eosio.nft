@@ -92,6 +92,8 @@ namespace eosio {
 	       
 	        return token_itr->owner;
 	}
+
+EOSIO_ABI( NFT, (create)(transfer) )
+
 } /// namespace eosio
 
-EOSIO_ABI( eosio::NFT, (create)(transfer) )
