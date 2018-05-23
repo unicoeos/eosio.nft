@@ -50,7 +50,7 @@ namespace eosio {
         eosio_assert( token_itr != sender_tokens.end(), "sender does not own token with specified ID" );
 
         // Transfer NFT from sender to receiver
-        receiver_tokens.modify( token_itr, from, [&]( auto& token ) {
+        sender_tokens.modify( token_itr, from, [&]( auto& token ) {
 	    token.owner = to;
         });
 
