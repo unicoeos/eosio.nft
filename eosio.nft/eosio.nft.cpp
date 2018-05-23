@@ -46,21 +46,12 @@ namespace eosio {
         tokens sender_tokens( _self, from );
 
         // Ensure owner owns token
-        auto token_itr = sender_tokens.find( id );
+        auto token_itr = sender_tokens.get( id );
         eosio_assert( token_itr != sender_tokens.end(), "sender does not own token with specified ID" );
 
-        // Token Object
-        const auto& token_object = *token_itr;
-
-        // Remove token from sender
-        sender_tokens.erase(token_itr);
-
         // Retrieve table for NFTs owned by 'to'
-        tokens receiver_tokens( _self, to );
-
         // Add token to receiver
-        receiver_tokens.emplace( from, [&]( auto& token ) {
-            token = token_object;
+        receiver_tokens.modify( token_itr, from, [&]( auto& token ) {
 	    token.owner = to;
         });
 
