@@ -8,31 +8,31 @@ namespace eosio {
     using std::string;
 
     // @abi action
-    void NFT::create( account_name owner, string uri )
+    void NFT::create( account_name owner, string symbol, string uri)
     {
         // Have permission to create token
         require_auth( owner );
 
         // Generate unique token
-        uint64_t unique_key = generate_unique_id(owner, tapos_block_prefix());//available_primary_key owner ^ murmur_hash(tapos_block_prefix());
-
+        uuid unique_key = generate_unique_id(owner, tapos_block_prefix());
 
         // Search for pre-existing token with same id
-        tokens tokens_table( _self, owner );
-        auto itr = tokens_table.find( unique_key );
-        eosio_assert( itr == tokens_table.end(), "token with id already exists" );
+        auto itr = tokens.find( unique_key );
+        eosio_assert( itr == tokens.end(), "token with id already exists" );
 
-        tokens_table.emplace( owner, [&]( auto& token ) {
+        // Add token with creator paying for RAM
+        tokens.emplace( owner, [&]( auto& token ) {
             token.id = unique_key;
+            token.owner = owner;
+            token.symbol = symbol;
             token.uri = uri;
-	    token.owner = owner;
         });
     }
 
     // @abi action
     void NFT::transfer( account_name from,
                         account_name to,
-                        uint64_t     id,
+                        uuid     id,
                         string       memo )
     {
         // Ensure authorized to send from account
@@ -42,27 +42,25 @@ namespace eosio {
         // Ensure 'to' account exists
         eosio_assert( is_account( to ), "to account does not exist");
 
-        // Retrieve table for NFTs owned by 'from'
-        tokens sender_tokens( _self, from );
-
         // Ensure owner owns token
-        auto token_itr = sender_tokens.find( id );
-        eosio_assert( token_itr != sender_tokens.end(), "sender does not own token with specified ID" );
+        auto sender_tokens = tokens.find( id );
+        eosio_assert( sender_tokens != tokens.end(), "sender does not own token with specified ID" );
 
         // Notify both recipients
         require_recipient( from );
         require_recipient( to );
 
-        // Check memo size
+        // Check memo size and print
         eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
 
         // Transfer NFT from sender to receiver
-        sender_tokens.modify( token_itr, from, [&]( auto& token ) {
-	    token.owner = to;
+        tokens.modify( sender_tokens, from, [&]( auto& token ) {
+	        token.owner = to;
         });
     }
 
-    uint64_t NFT::get_balance( account_name _owner) const
+    /*
+    uuid NFT::get_balance( account_name _owner) const
     {
 	// Ensure '_owner' account exists
 	eosio_assert( is_account( _owner ), "_owner account does not exist");
@@ -85,6 +83,7 @@ namespace eosio {
 
 	return token_itr->owner;
     }
+    */
 
 EOSIO_ABI( NFT, (create)(transfer) )
 
