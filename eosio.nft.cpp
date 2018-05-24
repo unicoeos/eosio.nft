@@ -6,33 +6,69 @@
 
 namespace eosio {
     using std::string;
+    using eosio::asset;
 
     // @abi action
-    void NFT::create( account_name owner, string symbol, string uri)
-    {
-        // Have permission to create token
-        require_auth( owner );
+    void NFT::create( account_name issuer, string sym ) {
+        require_auth( _self );
 
-        // Generate unique token
-        uuid unique_key = generate_unique_id(owner, tapos_block_prefix());
+        // Valid symbol
+        asset supply(0, string_to_symbol(0, sym.c_str()));
 
-        // Search for pre-existing token with same id
-        auto itr = tokens.find( unique_key );
-        eosio_assert( itr == tokens.end(), "token with id already exists" );
+        auto symbol = supply.symbol;
+        eosio_assert( symbol.is_valid(), "invalid symbol name" );
+        eosio_assert( supply.is_valid(), "invalid supply");
 
-        // Add token with creator paying for RAM
-        tokens.emplace( owner, [&]( auto& token ) {
-            token.id = unique_key;
-            token.owner = owner;
-            token.symbol = symbol;
-            token.uri = uri;
+        // Check if currency with symbol already exists
+        currency_index currency_table( _self, symbol.name() );
+        auto existing_currency = currency_table.find( symbol.name() );
+        eosio_assert( existing_currency == currency_table.end(), "currency with symbol already exists" );
+
+        // Create new currency
+        currency_table.emplace( _self, [&]( auto& currency ) {
+           currency.supply = supply;
+           currency.issuer = issuer;
         });
+    }
+
+    // @abi action
+    void NFT::issue( account_name to,
+                     asset quantity,
+                     string memo,
+                     int num_of_tokens,
+                     vector<std::string> uris )
+    {
+        // e,g, Get EOS from 3 EOS
+        auto symbol = quantity.symbol;
+        eosio_assert( symbol.is_valid(), "invalid symbol name" );
+        eosio_assert( symbol.precision() == 1, "quantity must be a while number" );
+        eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+
+        // Ensure currency has been created
+        auto symbol_name = symbol.name();
+        currency_index currency_table( _self, symbol_name );
+        auto existing_currency = currency_table.find( symbol_name );
+        eosio_assert( existing_currency != currency_table.end(), "token with symbol does not exist, create token before issue" );
+        const auto& st = *existing_currency;
+
+        // Ensure have issuer authorization and valid quantity
+        require_auth( st.issuer );
+        eosio_assert( quantity.is_valid(), "invalid quantity" );
+        eosio_assert( quantity.amount > 0, "must issue positive quantity of NFTs" );
+        eosio_assert( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
+
+        // Increase supply
+        currency_table.modify( st, 0, [&]( auto& currency ) {
+            currency.supply += quantity;
+        });
+
+        /*  add_balance( st.issuer, quantity, st.issuer );  */
     }
 
     // @abi action
     void NFT::transfer( account_name from,
                         account_name to,
-                        uuid     id,
+                        id_type      id,
                         string       memo )
     {
         // Ensure authorized to send from account
@@ -59,32 +95,26 @@ namespace eosio {
         });
     }
 
-    /*
-    uuid NFT::get_balance( account_name _owner) const
+    void NFT::create_tokens( account_name owner,
+                             asset value,
+                             int num_of_tokens,
+                             vector<std::string> uris )
     {
-	// Ensure '_owner' account exists
-	eosio_assert( is_account( _owner ), "_owner account does not exist");
+        // Check that number of tokens matches uri size
+        eosio_assert( num_of_tokens == uris.size(), "mismatch between number of tokens and uris provided" );
 
-	// Retrieve table for NFTs owned by '_owner'
-	tokens owner_tokens( _self, _owner );
-
-	uint64_t tokensNumber = 0;
-	for(auto it=owner_tokens.begin(); it!=owner_tokens.end();++it)
-		tokensNumber++;
-
-	return tokensNumber;
+        // For each uri provided, create token
+        for(auto const& uri: uris) {
+            // Add token with creator paying for RAM
+            tokens.emplace( owner, [&]( auto& token ) {
+                token.id = tokens.available_primary_key();
+                token.uri = uri;
+                token.owner = owner;
+                token.value = value;
+            });
+        }
     }
 
-    account_name NFT::get_owner( uint64_t id ) const
-    {
-	tokens all_tokens ( _self, _self );
-	auto token_itr = all_tokens.find( id );
-	eosio_assert( token_itr != all_tokens.end(), "owner does not exist for token with specified ID" );
-
-	return token_itr->owner;
-    }
-    */
-
-EOSIO_ABI( NFT, (create)(transfer) )
+EOSIO_ABI( NFT, (create)(issue)(transfer) )
 
 } /// namespace eosio

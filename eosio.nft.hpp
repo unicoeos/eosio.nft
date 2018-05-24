@@ -5,11 +5,8 @@
 #pragma once
 
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/transaction.hpp>
-#include <eosiolib/print.h>
+#include <eosiolib/asset.hpp>
 #include <string>
-#include <chrono>
-#include <ctime>
 
 namespace eosiosystem {
     class system_contract;
@@ -17,77 +14,65 @@ namespace eosiosystem {
 
 namespace eosio {
     using std::string;
-    typedef uint64_t uuid;
+    typedef uint128_t uuid;
+    typedef uint64_t id_type;
+    typedef string uri_type;
 
     class NFT : public contract {
     public:
-        NFT( account_name self ):contract(self), tokens(_self, _self){}
+        NFT(account_name self) : contract(self), tokens(_self, _self) {}
 
-        void create( account_name owner, string symbol, string uri );
+        void create( account_name issuer, string symbol );
 
-        void transfer( account_name from,
-                       account_name to,
-                       uuid         id,
-                       string       memo );
+        void issue( account_name to,
+                    asset quantity,
+                    string memo,
+                    int num_of_tokens,
+                    vector<std::string> uris );
 
-	// returns number of all tokens owned by _owner
-	// uint64_t get_balance( account_name _owner) const;
-
-	// return token owner by token id
-	// account_name get_owner(uint64_t tokenId) const;
-
-	// approve ownerhip of the token by tokenId
-	//void approve(account_name approved, uint64_t tokenId);
-
-	// approve ownership of all tokens
-	//void set_approval_for_all(account_name account, bool approved);
-
-	// return approved account of the token
-	//account_name get_approved(uint64_t tokenId) const;
-
-	// check if the account is approved for all owner tokens
-	//bool is_approved_for_all(account_name owner, account_name account) const;
-
-	//uint64_t total_supply() const;
+        void transfer(account_name from,
+                      account_name to,
+                      id_type      id,
+                      string       memo );
 
     private:
         friend eosiosystem::system_contract;
 
-        // @abi table token i64
-        struct token {
-            uuid           id;     // Unique 64 bit identifier,
-            string         uri;    // RFC 3986
-	        account_name   owner;  // token owner
-            string         symbol; // token symbol
+        // @abi table accounts i64
+        struct account {
+            asset balance;
 
-            auto primary_key() const { return id; }
-            /// auto get_account() const { return owner; }
-            // auto get_symbol() const { return symbol; }
+            uint64_t primary_key() const { return balance.symbol.name(); }
         };
 
+        // @abi table stat i64
+        struct stats {
+            asset supply;
+            account_name issuer;
+
+            uint64_t primary_key() const { return supply.symbol.name(); }
+            account_name get_issuer() const { return issuer; }
+        };
+
+        // @abi table token i64
+        struct token {
+            id_type id;          // Unique 64 bit identifier,
+            uri_type uri;        // RFC 3986
+            account_name owner;  // token owner
+            asset value;         // token value (1 SYS)
+
+            auto primary_key() const { return id; }
+            uuid get_global_id() const { return N(_self ) * id; }
+            auto get_account() const { return owner; }
+            auto get_uri() const { return uri; }
+            auto get_value() const { return value; }
+        };
+
+        typedef eosio::multi_index<N(accounts), account> account_index;
+        typedef eosio::multi_index<N(stat), stats> currency_index;
         typedef eosio::multi_index<N(token), token> token_index;
         token_index tokens;
 
+        void create_tokens(account_name owner, asset value, int num_of_tokens, vector<std::string> uris);
     };
-
-    inline static uuid generate_unique_id( account_name owner, int tapos_prefix ){
-
-        uint32_t accHash = std::hash<account_name>{}(owner);
-
-        uint32_t taposHash = std::hash<int>{}(tapos_prefix);
-        uint32_t accTaposXOR = accHash ^ taposHash;
-
-        print("Time right now() is: ", current_time(), "       ");
-
-        uint32_t timeHash = std::hash<uint64_t>{}(static_cast<uint64_t>(current_time()));
-        print("Time hash is: ", timeHash, "       ");
-
-        uint32_t accTimeXOR = accHash ^ timeHash;
-
-        uint64_t accTaposXOR64 = static_cast<uint64_t>(accTaposXOR);
-        uint64_t accTimeXOR64 = static_cast<uint64_t>(accTimeXOR);
-        uuid resHash = (accTaposXOR64 << 32) | (accTimeXOR64);
-        return resHash;
-    }
-
 } /// namespace eosio
