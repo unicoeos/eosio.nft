@@ -18,22 +18,25 @@ namespace eosio {
     typedef uint64_t id_type;
     typedef string uri_type;
 
-    class NFT : public contract {
+    class nft : public contract {
     public:
-        NFT(account_name self) : contract(self), tokens(_self, _self) {}
+        nft(account_name self) : contract(self), tokens(_self, _self) {}
 
         void create( account_name issuer, string symbol );
 
         void issue( account_name to,
                     asset quantity,
                     string memo,
-                    int num_of_tokens,
                     vector<std::string> uris );
 
         void transfer(account_name from,
                       account_name to,
                       id_type      id,
                       string       memo );
+
+        void burn( account_name owner,
+                   id_type token_id,
+                   string sym  );
 
     private:
         friend eosiosystem::system_contract;
@@ -73,6 +76,6 @@ namespace eosio {
         typedef eosio::multi_index<N(token), token> token_index;
         token_index tokens;
 
-        void create_tokens(account_name owner, asset value, int num_of_tokens, vector<std::string> uris);
+        void mint(account_name owner, asset value, string uri);
     };
 } /// namespace eosio
