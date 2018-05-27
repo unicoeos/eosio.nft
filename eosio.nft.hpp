@@ -22,21 +22,21 @@ namespace eosio {
     public:
         nft(account_name self) : contract(self), tokens(_self, _self) {}
 
-        void create( account_name issuer, string symbol );
+        void create(account_name issuer, string symbol);
 
-        void issue( account_name to,
-                    asset quantity,
-                    string memo,
-                    vector<std::string> uris );
+        void issue(account_name to,
+                   asset quantity,
+                   vector<string> uris,
+                   string memo);
 
         void transfer(account_name from,
                       account_name to,
-                      id_type      id,
-                      string       memo );
+                      id_type id,
+                      string memo);
 
-        void burn( account_name owner,
-                   id_type token_id,
-                   string sym  );
+        void burn(account_name owner,
+                  id_type token_id,
+                  string sym );
 
     private:
         friend eosiosystem::system_contract;
@@ -65,7 +65,7 @@ namespace eosio {
             asset value;         // token value (1 SYS)
 
             auto primary_key() const { return id; }
-            uuid get_global_id() const { return N(_self ) * id; }
+            uuid get_global_id() const { return N(_self) * id; }
             auto get_account() const { return owner; }
             auto get_uri() const { return uri; }
             auto get_value() const { return value; }
@@ -76,6 +76,11 @@ namespace eosio {
         typedef eosio::multi_index<N(token), token> token_index;
         token_index tokens;
 
-        void mint(account_name owner, asset value, string uri);
+        void mint(account_name owner, account_name ram_payer, asset value, string uri);
+
+        void sub_balance(account_name owner, asset value);
+        void add_balance(account_name owner, asset value, account_name ram_payer);
+        void sub_supply(asset quantity);
+        void add_supply(asset quantity);
     };
 } /// namespace eosio

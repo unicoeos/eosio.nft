@@ -34,18 +34,19 @@ namespace eosio {
     // @abi action
     void nft::issue( account_name to,
                      asset quantity,
-                     string memo,
-                     vector<string> uris )
+                     vector<string> uris,
+                     string memo)
     {
         // e,g, Get EOS from 3 EOS
         symbol_type symbol = quantity.symbol;
         eosio_assert( symbol.is_valid(), "invalid symbol name" );
-        eosio_assert( symbol.precision() == 1, "quantity must be a while number" );
+        eosio_assert( symbol.precision() == 0, "quantity must be a whole number" );
         eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
 
         // Ensure currency has been created
-        currency_index currency_table( _self, symbol );
-        auto existing_currency = currency_table.find( symbol );
+        auto symbol_name = symbol.name();
+        currency_index currency_table( _self, symbol_name );
+        auto existing_currency = currency_table.find( symbol_name );
         eosio_assert( existing_currency != currency_table.end(), "token with symbol does not exist, create token before issue" );
         const auto& st = *existing_currency;
 
@@ -65,17 +66,11 @@ namespace eosio {
 
         // Mint nfts
         for(auto const& uri: uris) {
-            mint( to, asset{ 1, symbol }, uri);
+            mint( to, st.issuer, asset{1, symbol}, uri);
         }
 
         // Add balance to account
-        account_index to_table( _self, to );
-        const auto& to_account = to_table.get( symbol, "no balance object found" );
-
-        to_table.modify( to_account, 0, [&]( auto& account ) {
-            account.balance += quantity;
-        });
-
+        add_balance( to, quantity, st.issuer );
     }
 
     // @abi action
@@ -109,29 +104,17 @@ namespace eosio {
         });
 
         // Change balance of both accounts
-        symbol_type symbol = st.value.symbol.name();
-
-        account_index from_table( _self, from );
-        const auto& from_account = from_table.get( symbol, "no balance object found" );
-        account_index to_table( _self, to );
-        const auto& to_account = to_table.get( symbol, "no balance object found" );
-
-        from_table.modify( from_account, 0, [&]( auto& account ) {
-            account.balance -= st.value;
-        });
-
-        to_table.modify( to_account, 0, [&]( auto& account ) {
-            account.balance += st.value;
-        });
-
+        sub_balance( from, st.value );
+        add_balance( to, st.value, from );
     }
 
     void nft::mint( account_name owner,
+                    account_name ram_payer,
                     asset value,
                     string uri)
     {
         // Add token with creator paying for RAM
-        tokens.emplace( owner, [&]( auto& token ) {
+        tokens.emplace( ram_payer, [&]( auto& token ) {
             token.id = tokens.available_primary_key();
             token.uri = uri;
             token.owner = owner;
@@ -139,46 +122,82 @@ namespace eosio {
         });
     }
 
-
+    // @abi action
     void nft::burn( account_name owner, id_type token_id, string sym  )
     {
         require_auth( owner );
 
-        // Token table
-        // Find token to burn
-        auto burn_token = tokens.find( token_id );
-        eosio_assert( burn_token->owner == owner, "token not owned by you" );
-
-        // Remove token from tokens table
-        tokens.erase( burn_token );
-
-
-        // Currency Table
         // Ensure symbol is valid
         symbol_type symbol = string_to_symbol(0, sym.c_str());
         eosio_assert( symbol.is_valid(), "invalid symbol name" );
 
+        // Find token to burn
+        auto burn_token = tokens.find( token_id );
+        eosio_assert( burn_token->owner == owner, "token not owned by account" );
+
+        // Remove token from tokens table
+        tokens.erase( burn_token );
+
         // Create asset
         asset burnt_supply(1, symbol);
 
-        // Remove supply
-        currency_index currency_table( _self, symbol );
-        auto current_currency = currency_table.find( symbol );
+        // Lower balance from owner
+        sub_balance( owner, burnt_supply );
+
+        // Lower supply from currency
+        sub_supply( burnt_supply );
+    }
+
+    void nft::sub_balance( account_name owner, asset value ) {
+        account_index from_acnts( _self, owner );
+
+        const auto& from = from_acnts.get( value.symbol.name(), "no balance object found" );
+        eosio_assert( from.balance.amount >= value.amount, "overdrawn balance" );
+
+
+        if( from.balance.amount == value.amount ) {
+            from_acnts.erase( from );
+        } else {
+            from_acnts.modify( from, owner, [&]( auto& a ) {
+                a.balance -= value;
+            });
+        }
+    }
+
+    void nft::add_balance( account_name owner, asset value, account_name ram_payer )
+    {
+        account_index to_accounts( _self, owner );
+        auto to = to_accounts.find( value.symbol.name() );
+        if( to == to_accounts.end() ) {
+            to_accounts.emplace( ram_payer, [&]( auto& a ){
+                a.balance = value;
+            });
+        } else {
+            to_accounts.modify( to, 0, [&]( auto& a ) {
+                a.balance += value;
+            });
+        }
+    }
+
+    void nft::sub_supply( asset quantity ) {
+        auto symbol_name = quantity.symbol.name();
+        currency_index currency_table( _self, symbol_name );
+        auto current_currency = currency_table.find( symbol_name );
 
         currency_table.modify( current_currency, 0, [&]( auto& currency ) {
-            currency.supply -= burnt_supply;
+            currency.supply -= quantity;
         });
+    }
 
+    void nft::add_supply( asset quantity )
+    {
+        auto symbol_name = quantity.symbol.name();
+        currency_index currency_table( _self, symbol_name );
+        auto current_currency = currency_table.find( symbol_name );
 
-        // Account table
-        // Lower supply
-        account_index account_table( _self, owner );
-        const auto& from = account_table.get( symbol.name(), "no balance object found" );
-
-        account_table.modify( from, 0, [&]( auto& account ) {
-            account.balance -= burnt_supply;
+        currency_table.modify( current_currency, 0, [&]( auto& currency ) {
+            currency.supply += quantity;
         });
-
     }
 
 EOSIO_ABI( nft, (create)(issue)(transfer)(burn) )
