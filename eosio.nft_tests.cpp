@@ -52,26 +52,6 @@ public:
       return base_tester::push_action( std::move(act), uint64_t(signer));
    }
 
-   vector<char> get_row_by_key( uint64_t code, uint64_t scope, uint64_t table, const id_type& key ) {
-	         vector<char> data;
-		       const auto& db = control->db();
-		             const auto* t_id = db.find<chain::table_id_object, chain::by_code_scope_table>( boost::make_tuple( code, scope, table ) );
-			           if ( !t_id ) {
-					            return data;
-						          }
-				         //FC_ASSERT( t_id != 0, "object not found" );
-					 
-					       const auto& idx = db.get_index<chain::key_value_index, chain::by_scope_primary>();
-					 
-					             auto itr = idx.lower_bound( boost::make_tuple( t_id->id, key ) );
-					                   if ( itr == idx.end() || itr->t_id != t_id->id || key != itr->primary_key ) {
-					                            return data;
-					                                  }
-					 
-					                                        data.resize( itr->value.size() );
-					                                              memcpy( data.data(), itr->value.data(), data.size() );
-					                                                    return data;
-					                                                       }
 					 
    fc::variant get_stats( const string& symbolname )
    {
@@ -91,7 +71,7 @@ public:
 
    fc::variant get_token(account_name acc, id_type token_id) 
    {
-      vector<char> data = get_row_by_key( N(eosio.nft), N(eosio.nft), N(token), token_id );
+      vector<char> data = get_row_by_account( N(eosio.nft), N(eosio.nft), N(token), token_id );
       FC_ASSERT(!data.empty(), "empty token");
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "token", data );
    }
