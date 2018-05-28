@@ -37,6 +37,9 @@ namespace eosio {
                      vector<string> uris,
                      string memo)
     {
+
+	eosio_assert( is_account( to ), "to account does not exist");
+
         // e,g, Get EOS from 3 EOS
         symbol_type symbol = quantity.symbol;
         eosio_assert( symbol.is_valid(), "invalid symbol name" );
