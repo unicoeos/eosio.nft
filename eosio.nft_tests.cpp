@@ -57,7 +57,7 @@ public:
       auto symb = eosio::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
       vector<char> data = get_row_by_account( N(eosio.nft), symbol_code, N(stat), symbol_code );
-      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "currency_stats", data );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "stats", data );
    }
 
    fc::variant get_account( account_name acc, const string& symbolname)
@@ -66,6 +66,12 @@ public:
       auto symbol_code = symb.to_symbol_code().value;
       vector<char> data = get_row_by_account( N(eosio.nft), acc, N(accounts), symbol_code );
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "account", data );
+   }
+
+   fc::variant get_token(id_type token_id) 
+   {
+      vector<char> data = get_row_by_account( N(eosio.nft), token_id, N(token), token_id );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "token", data );
    }
 
    action_result create( account_name issuer,
@@ -114,12 +120,11 @@ BOOST_AUTO_TEST_SUITE(eosio_nft_tests)
 BOOST_FIXTURE_TEST_CASE( create_tests, nft_tester ) try {
 
    auto token = create( N(alice), string("NFT"));
-   //auto stats = get_stats("3,TKN");
-   /*REQUIRE_MATCHING_OBJECT( stats, mvo()
-      ("supply", "0.000 TKN")
-      ("max_supply", "1000.000 TKN")
+   auto stats = get_stats("0,NFT");
+   REQUIRE_MATCHING_OBJECT( stats, mvo()
+      ("supply", "0 NFT") 
       ("issuer", "alice")
-   );*/
+   );
    produce_blocks(1);
 
 } FC_LOG_AND_RETHROW()
@@ -127,44 +132,19 @@ BOOST_FIXTURE_TEST_CASE( create_tests, nft_tester ) try {
 BOOST_FIXTURE_TEST_CASE( symbol_already_exists, nft_tester ) try {
 
    auto token = create( N(alice), string("NFT"));
-   /*auto stats = get_stats("0,TKN");
+   auto stats = get_stats("0,NFT");
    REQUIRE_MATCHING_OBJECT( stats, mvo()
-      ("supply", "0 TKN")
-      ("max_supply", "100 TKN")
+      ("supply", "0 NFT")
       ("issuer", "alice")
-   );*/
+   );
    produce_blocks(1);
 
-   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token with symbol already exists" ),
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "currency with symbol already exists" ),
                         create( N(alice), string("NFT"))
    );
 
 } FC_LOG_AND_RETHROW()
 
-
-BOOST_FIXTURE_TEST_CASE( create_max_decimals, nft_tester ) try {
-
-   /*auto token = create( N(alice), asset::from_string("1.000000000000000000 TKN"));
-   auto stats = get_stats("18,TKN");
-   REQUIRE_MATCHING_OBJECT( stats, mvo()
-      ("supply", "0.000000000000000000 TKN")
-      ("max_supply", "1.000000000000000000 TKN")
-      ("issuer", "alice")
-   );
-   produce_blocks(1);
-
-   asset max(10, symbol(SY(0, NKT)));
-   //1.0000000000000000000 => 0x8ac7230489e80000L
-   share_type amount = 0x8ac7230489e80000L;
-   static_assert(sizeof(share_type) <= sizeof(asset), "asset changed so test is no longer valid");
-   static_assert(std::is_trivially_copyable<asset>::value, "asset is not trivially copyable");
-   memcpy(&max, &amount, sizeof(share_type)); // hack in an invalid amount
-
-   BOOST_CHECK_EXCEPTION( create( N(alice), max) , asset_type_exception, [](const asset_type_exception& e) {
-      return expect_assert_message(e, "magnitude of asset amount must be less than 2^62");
-   });*/
-
-} FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
 
@@ -243,6 +223,52 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
       transfer( N(alice), N(bob), asset::from_string("-1000 CERO"), "hola" )
    );
    */
+
+} FC_LOG_AND_RETHROW()
+
+BOOST_FIXTURE_TEST_CASE( burn_tests, nft_tester ) try {
+
+	   /*auto token = create( N(alice), asset::from_string("1000 CERO"));
+	    *    produce_blocks(1);
+	    *
+	    *       issue( N(alice), N(alice), asset::from_string("1000 CERO"), "hola" );
+	    *
+	    *          auto stats = get_stats("0,CERO");
+	    *             REQUIRE_MATCHING_OBJECT( stats, mvo()
+	    *                   ("supply", "1000 CERO")
+	    *                         ("max_supply", "1000 CERO")
+	    *                               ("issuer", "alice")
+	    *                                  );
+	    *
+	    *                                     auto alice_balance = get_account(N(alice), "0,CERO");
+	    *                                        REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+	    *                                              ("balance", "1000 CERO")
+	    *                                                 );
+	    *
+	    *                                                    transfer( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
+	    *
+	    *                                                       alice_balance = get_account(N(alice), "0,CERO");
+	    *                                                          REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+	    *                                                                ("balance", "700 CERO")
+	    *                                                                      ("frozen", 0)
+	    *                                                                            ("whitelist", 1)
+	    *                                                                               );
+	    *
+	    *                                                                                  auto bob_balance = get_account(N(bob), "0,CERO");
+	    *                                                                                     REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
+	    *                                                                                           ("balance", "300 CERO")
+	    *                                                                                                 ("frozen", 0)
+	    *                                                                                                       ("whitelist", 1)
+	    *                                                                                                          );
+	    *
+	    *                                                                                                             BOOST_REQUIRE_EQUAL( wasm_assert_msg( "overdrawn balance" ),
+	    *                                                                                                                   transfer( N(alice), N(bob), asset::from_string("701 CERO"), "hola" )
+	    *                                                                                                                      );
+	    *
+	    *                                                                                                                         BOOST_REQUIRE_EQUAL( wasm_assert_msg( "must transfer positive quantity" ),
+	    *                                                                                                                               transfer( N(alice), N(bob), asset::from_string("-1000 CERO"), "hola" )
+	    *                                                                                                                                  );
+	    *                                                                                                                                     */
 
 } FC_LOG_AND_RETHROW()
 
