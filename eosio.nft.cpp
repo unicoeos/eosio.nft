@@ -133,6 +133,7 @@ namespace eosio {
 
         // Find token to burn
         auto burn_token = tokens.find( token_id );
+	eosio_assert( burn_token != tokens.end(), "token with id does not exist" );
         eosio_assert( burn_token->owner == owner, "token not owned by account" );
 
         // Remove token from tokens table

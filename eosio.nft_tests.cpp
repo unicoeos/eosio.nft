@@ -285,6 +285,11 @@ BOOST_FIXTURE_TEST_CASE( burn_tests, nft_tester ) try {
           ("balance", "1 NFT")
 	);
 
+	
+	BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token with id does not exist" ),
+		burn( N(alice), 100200, string("NFT") )
+	);
+
 	BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token not owned by account" ),
 		burn( N(bob), 0, string("NFT") )
 	);
