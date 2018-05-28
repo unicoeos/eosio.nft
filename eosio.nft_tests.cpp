@@ -68,9 +68,9 @@ public:
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "account", data );
    }
 
-   fc::variant get_token(id_type token_id) 
+   fc::variant get_token(account_name acc, id_type token_id) 
    {
-      vector<char> data = get_row_by_account( N(eosio.nft), token_id, N(token), token_id );
+      vector<char> data = get_row_by_account( N(eosio.nft), acc, N(token), token_id );
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "token", data );
    }
 
@@ -83,8 +83,8 @@ public:
       );
    }
 
-   action_result issue( account_name to, asset quantity, vector<string> uris, string memo ) {
-      return push_action( N(eosio.nft), N(issue), mvo()
+   action_result issue( account_name issuer, account_name to, asset quantity, vector<string> uris, string memo ) {
+      return push_action( issuer, N(issue), mvo()
            ( "to", to)
            ( "quantity", quantity)
 	   ( "uris", uris)
@@ -139,7 +139,7 @@ BOOST_FIXTURE_TEST_CASE( symbol_already_exists, nft_tester ) try {
    );
    produce_blocks(1);
 
-   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "currency with symbol already exists" ),
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token with symbol already exists" ),
                         create( N(alice), string("NFT"))
    );
 
@@ -148,35 +148,71 @@ BOOST_FIXTURE_TEST_CASE( symbol_already_exists, nft_tester ) try {
 
 BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
 
-   /*auto token = create( N(alice), asset::from_string("1000.000 TKN"));
+   auto newtoken = create( N(alice), string("TKN"));
    produce_blocks(1);
 
-   issue( N(alice), N(alice), asset::from_string("500.000 TKN"), "hola" );
+   vector<string> uris = {"uri"};
 
-   auto stats = get_stats("3,TKN");
+   issue( N(alice), N(alice), asset::from_string("1 TKN"), uris, "hola" );
+
+   auto stats = get_stats("0,TKN");
    REQUIRE_MATCHING_OBJECT( stats, mvo()
-      ("supply", "500.000 TKN")
-      ("max_supply", "1000.000 TKN")
+      ("supply", "1 TKN")
       ("issuer", "alice")
    );
 
-   auto alice_balance = get_account(N(alice), "3,TKN");
+   /*auto tokenval = get_token(N(alice), 1);
+   REQUIRE_MATCHING_OBJECT( tokenval, mvo()
+      ("id", 1)
+      ("uri", "uri")
+      ("owner", "alice")
+      ("value", "1 TKN")
+   );*/
+
+
+   auto alice_balance = get_account(N(alice), "0,TKN");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
-      ("balance", "500.000 TKN")
+      ("balance", "1 TKN")
    );
 
-   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "quantity exceeds available supply" ),
-      issue( N(alice), N(alice), asset::from_string("500.001 TKN"), "hola" )
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "quantity must be a whole number" ),
+      issue( N(alice), N(alice), asset::from_string("1.05 TKN"), uris, "hola" )
    );
 
-   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "must issue positive quantity" ),
-      issue( N(alice), N(alice), asset::from_string("-1.000 TKN"), "hola" )
+   string memo;
+   for(auto i=0; i<100; i++)
+   {
+	memo += "hola";
+   }
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "memo has more than 256 bytes" ),
+      issue( N(alice), N(alice), asset::from_string("1 TKN"), uris, memo )
+   );
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token with symbol does not exist, create token before issue" ),
+      issue( N(alice), N(alice), asset::from_string("1 TTT"), uris, "hole" )
+   );
+
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "must issue positive quantity of NFTs" ),
+      issue( N(alice), N(alice), asset::from_string("-1 TKN"), uris, "hole" )
+   );
+
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "mismatch between number of tokens and uris provided" ),
+      issue( N(alice), N(alice), asset::from_string("2 TKN"), uris, "hole" ) 
    );
 
    BOOST_REQUIRE_EQUAL( success(),
-      issue( N(alice), N(alice), asset::from_string("1.000 TKN"), "hola" )
+      issue( N(alice), N(alice), asset::from_string("1 TKN"), uris, "hola" )
    );
-   */
+
+
+   uris.push_back("uri2");
+
+   BOOST_REQUIRE_EQUAL( success(),
+      issue( N(alice), N(alice), asset::from_string("2 TKN"), uris, "hola" )
+   );
 
 } FC_LOG_AND_RETHROW()
 
@@ -228,47 +264,31 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
 
 BOOST_FIXTURE_TEST_CASE( burn_tests, nft_tester ) try {
 
-	   /*auto token = create( N(alice), asset::from_string("1000 CERO"));
-	    *    produce_blocks(1);
-	    *
-	    *       issue( N(alice), N(alice), asset::from_string("1000 CERO"), "hola" );
-	    *
-	    *          auto stats = get_stats("0,CERO");
-	    *             REQUIRE_MATCHING_OBJECT( stats, mvo()
-	    *                   ("supply", "1000 CERO")
-	    *                         ("max_supply", "1000 CERO")
-	    *                               ("issuer", "alice")
-	    *                                  );
-	    *
-	    *                                     auto alice_balance = get_account(N(alice), "0,CERO");
-	    *                                        REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
-	    *                                              ("balance", "1000 CERO")
-	    *                                                 );
-	    *
-	    *                                                    transfer( N(alice), N(bob), asset::from_string("300 CERO"), "hola" );
-	    *
-	    *                                                       alice_balance = get_account(N(alice), "0,CERO");
-	    *                                                          REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
-	    *                                                                ("balance", "700 CERO")
-	    *                                                                      ("frozen", 0)
-	    *                                                                            ("whitelist", 1)
-	    *                                                                               );
-	    *
-	    *                                                                                  auto bob_balance = get_account(N(bob), "0,CERO");
-	    *                                                                                     REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
-	    *                                                                                           ("balance", "300 CERO")
-	    *                                                                                                 ("frozen", 0)
-	    *                                                                                                       ("whitelist", 1)
-	    *                                                                                                          );
-	    *
-	    *                                                                                                             BOOST_REQUIRE_EQUAL( wasm_assert_msg( "overdrawn balance" ),
-	    *                                                                                                                   transfer( N(alice), N(bob), asset::from_string("701 CERO"), "hola" )
-	    *                                                                                                                      );
-	    *
-	    *                                                                                                                         BOOST_REQUIRE_EQUAL( wasm_assert_msg( "must transfer positive quantity" ),
-	    *                                                                                                                               transfer( N(alice), N(bob), asset::from_string("-1000 CERO"), "hola" )
-	    *                                                                                                                                  );
-	    *                                                                                                                                     */
+	auto token = create( N(alice), string("NFT"));
+    	
+	produce_blocks(1);
+	
+        vector<string> uris = {"uri1", "uri2"};
+
+	issue( N(alice), N(alice), asset::from_string("2 NFT"), uris, "issue 2 tokens" );
+
+	burn( N(alice), 1, string("NFT"));
+
+	auto stats = get_stats("0,NFT");
+	REQUIRE_MATCHING_OBJECT( stats, mvo()
+          ("supply", "1 NFT")
+	  ("issuer", "alice")
+	);				       
+
+        auto alice_balance = get_account(N(alice), "0,NFT");
+	REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+          ("balance", "1 NFT")
+	);
+
+	BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token not owned by account" ),
+		burn( N(bob), 0, string("NFT") )
+	);
+
 
 } FC_LOG_AND_RETHROW()
 

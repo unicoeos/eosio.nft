@@ -22,7 +22,7 @@ namespace eosio {
         // Check if currency with symbol already exists
         currency_index currency_table( _self, symbol.name() );
         auto existing_currency = currency_table.find( symbol.name() );
-        eosio_assert( existing_currency == currency_table.end(), "currency with symbol already exists" );
+        eosio_assert( existing_currency == currency_table.end(), "token with symbol already exists" );
 
         // Create new currency
         currency_table.emplace( _self, [&]( auto& currency ) {
