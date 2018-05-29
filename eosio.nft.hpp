@@ -35,8 +35,7 @@ namespace eosio {
                       string memo);
 
         void burn(account_name owner,
-                  id_type token_id,
-                  string sym );
+                  id_type token_id);
 
     private:
         friend eosiosystem::system_contract;

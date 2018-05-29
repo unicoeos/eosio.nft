@@ -99,9 +99,6 @@
         },{
           "name": "token_id",
           "type": "id_type"
-        },{
-          "name": "sym",
-          "type": "string"
         }
       ]
     }

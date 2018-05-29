@@ -126,24 +126,20 @@ namespace eosio {
     }
 
     // @abi action
-    void nft::burn( account_name owner, id_type token_id, string sym  )
+    void nft::burn( account_name owner, id_type token_id )
     {
         require_auth( owner );
 
-        // Ensure symbol is valid
-        symbol_type symbol = string_to_symbol(0, sym.c_str());
-        eosio_assert( symbol.is_valid(), "invalid symbol name" );
 
         // Find token to burn
         auto burn_token = tokens.find( token_id );
 	eosio_assert( burn_token != tokens.end(), "token with id does not exist" );
-        eosio_assert( burn_token->owner == owner, "token not owned by account" );
+	eosio_assert( burn_token->owner == owner, "token not owned by account" );
+
+	asset burnt_supply = burn_token->value;
 
         // Remove token from tokens table
         tokens.erase( burn_token );
-
-        // Create asset
-        asset burnt_supply(1, symbol);
 
         // Lower balance from owner
         sub_balance( owner, burnt_supply );

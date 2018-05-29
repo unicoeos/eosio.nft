@@ -106,11 +106,10 @@ public:
       );
    }
 
-   action_result burn( account_name owner, id_type token_id, string sym ){
+   action_result burn( account_name owner, id_type token_id ){
    	return push_action( owner, N(burn), mvo()
 	   ( "owner", owner)
 	   ( "token_id", token_id)
-	   ( "sym", sym)
 	);
    }
 
@@ -345,7 +344,7 @@ BOOST_FIXTURE_TEST_CASE( burn_tests, nft_tester ) try {
 
 	issue( N(alice), N(alice), asset::from_string("2 NFT"), uris, "issue 2 tokens" );
 
-	burn( N(alice), 1, string("NFT"));
+	burn( N(alice), 1);
 
 	auto stats = get_stats("0,NFT");
 	REQUIRE_MATCHING_OBJECT( stats, mvo()
@@ -359,14 +358,14 @@ BOOST_FIXTURE_TEST_CASE( burn_tests, nft_tester ) try {
 	);
        
 	BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token with id does not exist" ),
-	   burn( N(alice), 100200, string("NFT") )
+	   burn( N(alice), 100200 )
 	);
 
         BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token not owned by account" ),
-	   burn( N(bob), 0, string("NFT") )
+	   burn( N(bob), 0 )
 	);
 
-	burn( N(alice), 0, "NFT");
+	burn( N(alice), 0);
 	auto stats2 = get_stats("0,NFT");
 	REQUIRE_MATCHING_OBJECT( stats2, mvo()
 		("supply", "0 NFT")
