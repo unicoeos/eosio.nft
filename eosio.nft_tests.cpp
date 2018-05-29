@@ -227,12 +227,14 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
    auto token = create( N(alice), string("NFT"));
    produce_blocks(1);
 
-   vector<string> uris = {"uri", "uri2"};
+   vector<string> uris = {"uri", "uri2", "uri3"};
 
-   issue( N(alice), N(alice), asset::from_string("2 NFT"), uris, "hola" );
+   issue( N(alice), N(alice), asset::from_string("3 NFT"), uris, "hola" );
 
    transfer( N(alice), N(bob), 0, "send token 0 to bob" );
    
+   transfer( N(alice), N(bob), 1, "send token 1 to bob" );
+
 
    auto alice_balance = get_account(N(alice), "0,NFT");
    REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
@@ -241,7 +243,36 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
 
    auto bob_balance = get_account(N(bob), "0,NFT");
    REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
-      ("balance", "1 NFT")
+      ("balance", "2 NFT")
+   );
+
+   auto tokenval = get_token(N(bob), 1);
+   REQUIRE_MATCHING_OBJECT( tokenval, mvo()
+        ("id", "1")
+        ("uri", "uri2")
+	("owner", "bob")
+	("value", "1 NFT")
+   );
+
+
+   transfer (N(bob), N(carol), 1, "send token 1 to carol");
+
+   auto bob_balance1 = get_account(N(bob), "0,NFT");
+   REQUIRE_MATCHING_OBJECT( bob_balance1, mvo()
+        ("balance", "1 NFT")		   
+   );
+
+   auto carol_balance = get_account(N(carol), "0,NFT");
+   REQUIRE_MATCHING_OBJECT( carol_balance, mvo()
+        ("balance", "1 NFT")
+   );
+
+   auto tokenval_1 = get_token(N(carol), 1);
+   REQUIRE_MATCHING_OBJECT( tokenval_1, mvo()
+      	("id", "1")
+      	("uri", "uri2")
+	("owner", "carol")
+	("value", "1 NFT")
    );
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "cannot transfer to self" ),
