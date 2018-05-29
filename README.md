@@ -25,7 +25,7 @@ Welcome to the EOSIO NFT source code repository! This document describes the int
 	memo - action memo (max. 256 bytes)
 	
 #### Description
-	Issues specified number of tokens with previousle created symbol to the account name "to". Each token is generated with an  unique token_id assigned to it. 
+	Issues specified number of tokens with previousle created symbol to the account name "to". Each token is generated with an  unique token_id assigned to it.
 
 ### TRANSFER
 #### Declaration
