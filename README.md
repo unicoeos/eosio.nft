@@ -1,0 +1,2 @@
+# eosio.nft
+NFT Token 
