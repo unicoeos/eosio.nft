@@ -322,16 +322,22 @@ BOOST_FIXTURE_TEST_CASE( burn_tests, nft_tester ) try {
 	REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
           ("balance", "1 NFT")
 	);
-
-	
+       
 	BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token with id does not exist" ),
-		burn( N(alice), 100200, string("NFT") )
+	   burn( N(alice), 100200, string("NFT") )
 	);
 
-	BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token not owned by account" ),
-		burn( N(bob), 0, string("NFT") )
+        BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token not owned by account" ),
+	   burn( N(bob), 0, string("NFT") )
 	);
 
+	burn( N(alice), 0, "NFT");
+	auto stats2 = get_stats("0,NFT");
+	REQUIRE_MATCHING_OBJECT( stats2, mvo()
+		("supply", "0 NFT")
+		("issuer", "alice")
+	);
+	
 
 } FC_LOG_AND_RETHROW()
 
