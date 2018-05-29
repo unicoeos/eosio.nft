@@ -147,6 +147,41 @@ BOOST_FIXTURE_TEST_CASE( symbol_already_exists, nft_tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
+BOOST_FIXTURE_TEST_CASE ( issue_multi_tests, nft_tester ) try {
+
+	auto newtoken = create( N(alice), string("TKN"));
+   	produce_blocks(2);
+
+      	vector<string> uris = {"uri1", "uri2", "uri3", "uri4", "uri5"};
+
+        issue( N(alice), N(alice), asset::from_string("5 TKN"), uris, "hola" );
+
+	auto stats = get_stats("0,TKN");
+	REQUIRE_MATCHING_OBJECT( stats, mvo()
+		("supply", "5 TKN")
+		("issuer", "alice")
+	);
+
+	for(auto i=0; i<5; i++)
+	{
+		//string indx = to_string(i);
+		auto tokenval = get_token(N(alice), (id_type)i);
+		REQUIRE_MATCHING_OBJECT( tokenval, mvo()
+			("id", i)
+			("uri", uris[i])
+			("owner", "alice")
+			("value", "1 TKN")
+		);
+	}
+
+
+	auto alice_balance = get_account(N(alice), "0,TKN");
+	REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+		("balance", "5 TKN")
+	);
+
+} FC_LOG_AND_RETHROW()
+
 
 BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
 
