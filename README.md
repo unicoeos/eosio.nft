@@ -16,11 +16,14 @@ Welcome to the EOSIO NFT source code repository! This document describes the int
 	
 ### ISSUE
 #### Declaration
-	void create(account_name issuer, string symbol);
+	void issue(account_name to, asset quantity, vector<string> uris, string memo);
 	
 #### Parameters
-	issuer - account name of the token issuer
-	symbol - symbol code of the token
+	to - account name of tokens receiver
+	quantity - number of tokens to issue for specified symbol (positive integer number)
+	uris - vector of URIs for each issued token (size equals to tokens number)
+	memo - action memo (max. 256 bytes)
 	
 #### Description
-	Creates token with symbol name for the issuer account.
+	Issues specified number of tokens with previousle created symbol to the account name "to". Each token is generated with an unique         id assigned to it. 
+
