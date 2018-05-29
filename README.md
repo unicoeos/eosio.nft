@@ -20,7 +20,7 @@ In general, all houses are distinct and no two kittens are alike. NFTs are *dist
 
 A standard interface allows wallet/broker/auction applications to work with any NFT on EOS blockchain. A simple eosio.nft smart contract is provided.
 
-This standard is inspired by the eosio.token standard. eosio.token is insufficient for tracking NFTs because each asset is distinct (non-fungible) whereas each of a quantity of tokens is identical (fungible).\
+This standard is inspired by the eosio.token standard. eosio.token is insufficient for tracking NFTs because each asset is distinct (non-fungible) whereas each of a quantity of tokens is identical (fungible).
 
 ## Specification
 
