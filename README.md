@@ -1,6 +1,6 @@
 # NFT - EOSIO non-fungible token
 
-Welcome to the EOSIO NFT source code repository! This document describes the interface of the non-fungible token - NFT, for EOSIO blockchain.
+Welcome to the EOSIO NFT source code repository! This document describes the interface of the non-fungible token - NFT, for the EOSIO blockchain.
 
 ## Public interface
 ### CREATE
