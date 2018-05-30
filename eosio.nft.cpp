@@ -89,6 +89,9 @@ namespace eosio {
         // Ensure 'to' account exists
         eosio_assert( is_account( to ), "to account does not exist");
 
+	// Check memo size and print
+        eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+	    
         // Ensure owner owns token
         auto sender_token = tokens.find( id );
         eosio_assert( sender_token != tokens.end(), "sender does not own token with specified ID" );
@@ -97,9 +100,6 @@ namespace eosio {
         // Notify both recipients
         require_recipient( from );
         require_recipient( to );
-
-        // Check memo size and print
-        eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
 
         // Transfer NFT from sender to receiver
         tokens.modify( st, from, [&]( auto& token ) {
