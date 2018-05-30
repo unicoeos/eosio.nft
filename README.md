@@ -13,10 +13,10 @@ The following standard allows the implementation of a standard API for NFTs with
 NFTs can represent ownership over digital or physical assets:
 
 - Physical property — houses, unique artwork
-- Virtual collectables — unique pictures of kittens, collectable cards
+- Cryptocollectibles — unique collectibles or  instances which are part of limited-edition collections. 
 - "Negative value" assets — loans, burdens and other responsibilities
 
-In general, all houses are distinct and no two kittens are alike. NFTs are *distinguishable* and you must track the ownership of each one separately.
+NFTs are *distinguishable* and you must track the ownership of each one separately.
 
 ## Motivation
 
