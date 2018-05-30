@@ -84,6 +84,54 @@ namespace eosio {
 	/// @param id Unique ID of the token to burn
         void burn(account_name owner,
                   id_type token_id);
+    
+    private:
+        friend eosiosystem::system_contract;
+
+	/// Structure keeps information about the balance of tokens 
+	/// for each symbol that is owned by an account. 
+	/// This structure is stored in the multi_index table.
+        // @abi table accounts i64
+        struct account {
+            asset balance;
+	    
+            uint64_t primary_key() const { return balance.symbol.name(); }
+        };
+
+	/// Structure keeps information about the total supply 
+	/// of tokens for each symbol issued by "issue" account. 
+	/// This structure is stored in the multi_index table.
+        // @abi table stat i64
+        struct stats {
+            asset supply;
+            account_name issuer;
+
+            uint64_t primary_key() const { return supply.symbol.name(); }
+            account_name get_issuer() const { return issuer; }
+        };
+
+	/// Structure keeps information about each issued token.
+	/// Each token is assigned a global unique ID when it is issued. 
+	/// Token also keeps track of its owner, stores assigned URI and its symbol code.    
+	/// This structure is stored in the multi_index table "tokens".
+        // @abi table token i64
+        struct token {
+            id_type id;          // Unique 64 bit identifier,
+            uri_type uri;        // RFC 3986
+            account_name owner;  // token owner
+            asset value;         // token value (1 SYS)
+
+            auto primary_key() const { return id; }
+            uuid get_global_id() const { return N(_self) * id; }
+            auto get_account() const { return owner; }
+            auto get_uri() const { return uri; }
+            auto get_value() const { return value; }
+        };
+	
+	typedef eosio::multi_index<N(accounts), account> account_index;
+        typedef eosio::multi_index<N(stat), stats> currency_index;
+        typedef eosio::multi_index<N(token), token> token_index;
+        token_index tokens;
     };
 } /// namespace eosio
 ```
