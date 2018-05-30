@@ -64,10 +64,17 @@ namespace eosio {
             asset value;         // token value (1 SYS)
 
             auto primary_key() const { return id; }
-            uuid get_global_id() const { return N(_self) * id; }
             auto get_account() const { return owner; }
             auto get_uri() const { return uri; }
             auto get_value() const { return value; }
+
+	    uuid get_global_id() const
+	    {
+		uint128_t self_128 = static_cast<uint128_t>(N(_self));
+		uint128_t id_128 = static_cast<uint128_t>(id);
+		uint128_t res = (self_128 << 64) | (id_128);
+		return res;
+	    }
         };
 
         typedef eosio::multi_index<N(accounts), account> account_index;

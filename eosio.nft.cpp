@@ -59,10 +59,9 @@ namespace eosio {
         eosio_assert( quantity.amount > 0, "must issue positive quantity of NFTs" );
         eosio_assert( symbol == st.supply.symbol, "symbol precision mismatch" );
 
+
         // Increase supply
-        currency_table.modify( st, 0, [&]( auto& currency ) {
-            currency.supply += quantity;
-        });
+	add_supply( quantity );
 
         // Check that number of tokens matches uri size
         eosio_assert( quantity.amount == uris.size(), "mismatch between number of tokens and uris provided" );
@@ -94,7 +93,8 @@ namespace eosio {
         eosio_assert( sender_token != tokens.end(), "sender does not own token with specified ID" );
         const auto& st = *sender_token;
 
-        // Notify both recipients
+	
+	// Notify both recipients
         require_recipient( from );
         require_recipient( to );
 
@@ -138,7 +138,8 @@ namespace eosio {
 
 	asset burnt_supply = burn_token->value;
 
-        // Remove token from tokens table
+        
+	// Remove token from tokens table
         tokens.erase( burn_token );
 
         // Lower balance from owner
