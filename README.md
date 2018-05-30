@@ -1,4 +1,6 @@
-# Non-Fungible Token (NFT) Proposal
+# Non-Fungible Token (NFT) 
+
+For any questions, contributions or feedback join our dedicated telegram group: https://t.me/eosionft
 
 ## Simple Summary
 
