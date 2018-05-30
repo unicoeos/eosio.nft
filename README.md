@@ -138,3 +138,8 @@ namespace eosio {
 } /// namespace eosio
 ```
 
+## To-do
+1. Add secondary indices
+2. Add approval?
+3. Transfer between contracts
+
