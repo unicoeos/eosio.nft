@@ -1,4 +1,4 @@
-# Non-Fungible Token (NFT) Proposal on EOS
+# eosio.nft - Non-Fungible Token (NFT) Proposal
 
 ## Simple Summary
 
