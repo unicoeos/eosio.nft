@@ -12,6 +12,9 @@ namespace eosio {
     void nft::create( account_name issuer, string sym ) {
         require_auth( _self );
 
+	// Check if issuer account exists 
+	eosio_assert( is_account( issuer ), "issuer account does not exist");
+
         // Valid symbol
         asset supply(0, string_to_symbol(0, sym.c_str()));
 

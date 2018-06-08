@@ -128,6 +128,10 @@ BOOST_FIXTURE_TEST_CASE( create_tests, nft_tester ) try {
    );
    produce_blocks(1);
 
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "issuer account does not exist" ),
+	create( N(dummy), string("TKN"))
+   );
+
 } FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE( symbol_already_exists, nft_tester ) try {
@@ -189,7 +193,7 @@ BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
 
    vector<string> uris = {"uri"};
 
-   issue( N(alice), N(alice), asset::from_string("1 TKN"), uris, "hola" );
+   issue( N(alice), N(bob), asset::from_string("1 TKN"), uris, "hola" );
 
    auto stats = get_stats("0,TKN");
    REQUIRE_MATCHING_OBJECT( stats, mvo()
@@ -201,13 +205,13 @@ BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
    REQUIRE_MATCHING_OBJECT( tokenval, mvo()
       ("id", "0")
       ("uri", "uri")
-      ("owner", "alice")
+      ("owner", "bob")
       ("value", "1 TKN")
    );
 
 
-   auto alice_balance = get_account(N(alice), "0,TKN");
-   REQUIRE_MATCHING_OBJECT( alice_balance, mvo()
+   auto bob_balance = get_account(N(bob), "0,TKN");
+   REQUIRE_MATCHING_OBJECT( bob_balance, mvo()
       ("balance", "1 TKN")
    );
 
