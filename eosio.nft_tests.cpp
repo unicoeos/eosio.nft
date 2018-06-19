@@ -270,7 +270,8 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
    issue( N(alice), N(alice), asset::from_string("3 NFT"), uris, "hola" );
 
    transfer( N(alice), N(bob), 0, "send token 0 to bob" );
-   
+
+
    transfer( N(alice), N(bob), 1, "send token 1 to bob" );
 
 
@@ -291,7 +292,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
 	("owner", "bob")
 	("value", "1 NFT")
    );
-
+   
 
    transfer (N(bob), N(carol), 1, "send token 1 to carol");
 
@@ -299,12 +300,12 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
    REQUIRE_MATCHING_OBJECT( bob_balance1, mvo()
         ("balance", "1 NFT")		   
    );
-
+   
    auto carol_balance = get_account(N(carol), "0,NFT");
    REQUIRE_MATCHING_OBJECT( carol_balance, mvo()
         ("balance", "1 NFT")
    );
-
+   
    auto tokenval_1 = get_token(N(carol), 1);
    REQUIRE_MATCHING_OBJECT( tokenval_1, mvo()
       	("id", "1")
@@ -312,6 +313,10 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
 	("owner", "carol")
 	("value", "1 NFT")
    );
+   
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "sender does not own token with specified ID" ),
+      transfer( N(alice), N(carol), 0, "send from non-owner" )
+   );	
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "cannot transfer to self" ),
       transfer( N(alice), N(alice), 1, "send to the issuer" )
@@ -321,7 +326,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
       transfer( N(alice), N(dummy), 1, "send to non-existing" )
    );
 
-   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "sender does not own token with specified ID" ),
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token with specified ID does not exist" ),
       transfer( N(alice), N(bob), 3, "no token id" )
    );
 

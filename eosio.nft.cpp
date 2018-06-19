@@ -94,10 +94,15 @@ namespace eosio {
 	// Check memo size and print
         eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
 	    
-        // Ensure owner owns token
+        // Ensure token ID exists
         auto sender_token = tokens.find( id );
-        eosio_assert( sender_token != tokens.end(), "sender does not own token with specified ID" );
-        const auto& st = *sender_token;
+        eosio_assert( sender_token != tokens.end(), "token with specified ID does not exist" );
+        
+	// Ensure owner owns token
+        eosio_assert( sender_token->owner == from, "sender does not own token with specified ID");
+       	
+
+	const auto& st = *sender_token;
 
 	
 	// Notify both recipients
