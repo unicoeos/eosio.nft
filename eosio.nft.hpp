@@ -27,6 +27,7 @@ namespace eosio {
         void issue(account_name to,
                    asset quantity,
                    vector<string> uris,
+		   string name,
                    string memo);
 
         void transfer(account_name from,
@@ -37,10 +38,8 @@ namespace eosio {
         void burn(account_name owner,
                   id_type token_id);
 
-    private:
-        friend eosiosystem::system_contract;
 
-        // @abi table accounts i64
+	// @abi table account i64
         struct account {
             asset balance;
 
@@ -62,11 +61,14 @@ namespace eosio {
             uri_type uri;        // RFC 3986
             account_name owner;  // token owner
             asset value;         // token value (1 SYS)
+	    string name;	 // token name
 
-            auto primary_key() const { return id; }
-            auto get_account() const { return owner; }
-            auto get_uri() const { return uri; }
-            auto get_value() const { return value; }
+            id_type primary_key() const { return id; }
+            account_name get_owner() const { return owner; }
+            string get_uri() const { return uri; }
+            asset get_value() const { return value; }
+	    uint64_t get_symbol() const { return value.symbol.name(); }
+	    uint64_t get_name() const { return string_to_name(name.c_str()); }
 
 	    uuid get_global_id() const
 	    {
@@ -75,14 +77,41 @@ namespace eosio {
 		uint128_t res = (self_128 << 64) | (id_128);
 		return res;
 	    }
+
+	    string get_unique_name() const
+	    {
+		string unique_name = name + "#" + std::to_string(id);
+		return unique_name;
+	    }
         };
 
-        typedef eosio::multi_index<N(accounts), account> account_index;
-        typedef eosio::multi_index<N(stat), stats> currency_index;
-        typedef eosio::multi_index<N(token), token> token_index;
-        token_index tokens;
+	using account_index = eosio::multi_index<N(accounts), account>;
 
-        void mint(account_name owner, account_name ram_payer, asset value, string uri);
+	using currency_index = eosio::multi_index<N(stat), stats,
+	                       indexed_by< N( byissuer ), const_mem_fun< stats, account_name, &stats::get_issuer> > >;
+
+	using token_index = eosio::multi_index<N(token), token,
+	                    indexed_by< N( byowner ), const_mem_fun< token, account_name, &token::get_owner> >,
+			    indexed_by< N( bysymbol ), const_mem_fun< token, uint64_t, &token::get_symbol> >,
+		            indexed_by< N( byname ), const_mem_fun< token, uint64_t, &token::get_name> > >;
+
+    	private:
+	    friend eosiosystem::system_contract;
+
+
+        //typedef eosio::multi_index<N(accounts), account> account_index;
+        
+	//typedef eosio::multi_index<N(stat), stats, 
+	//	indexed_by< N( byissuer ), const_mem_func< stats, account_name, &stats::get_issuer> > > currency_index;
+        
+	//typedef eosio::multi_index<N(token), token, 
+	//	indexed_by< N( byowner ), const_mem_func< token, account_name, @token::get_owner> >,
+	//        indexed_by< N( bysymbol ), const_mem_func< token, account_name, @token::get_symbol> > > token_index;
+        
+
+	token_index tokens;
+
+        void mint(account_name owner, account_name ram_payer, asset value, string uri, string name);
 
         void sub_balance(account_name owner, asset value);
         void add_balance(account_name owner, asset value, account_name ram_payer);

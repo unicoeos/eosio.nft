@@ -38,6 +38,7 @@ namespace eosio {
     void nft::issue( account_name to,
                      asset quantity,
                      vector<string> uris,
+		     string name,
                      string memo)
     {
 
@@ -48,6 +49,15 @@ namespace eosio {
         eosio_assert( symbol.is_valid(), "invalid symbol name" );
         eosio_assert( symbol.precision() == 0, "quantity must be a whole number" );
         eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+
+	eosio_assert( name.size() <= 32, "name has more than 32 bytes" );
+	eosio_assert( name.size() > 0, "name is empty" );
+
+
+	auto nameind = tokens.get_index<N(byname)>();
+	auto nameitr = nameind.find(string_to_name(name.c_str()));
+
+	eosio_assert( nameitr == nameind.end(), "name is already used" );
 
         // Ensure currency has been created
         auto symbol_name = symbol.name();
@@ -71,7 +81,7 @@ namespace eosio {
 
         // Mint nfts
         for(auto const& uri: uris) {
-            mint( to, st.issuer, asset{1, symbol}, uri);
+            mint( to, st.issuer, asset{1, symbol}, uri, name);
         }
 
         // Add balance to account
@@ -122,7 +132,8 @@ namespace eosio {
     void nft::mint( account_name owner,
                     account_name ram_payer,
                     asset value,
-                    string uri)
+                    string uri,
+		    string name)
     {
         // Add token with creator paying for RAM
         tokens.emplace( ram_payer, [&]( auto& token ) {
@@ -130,6 +141,7 @@ namespace eosio {
             token.uri = uri;
             token.owner = owner;
             token.value = value;
+	    token.name = name;
         });
     }
 
