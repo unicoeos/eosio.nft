@@ -95,19 +95,8 @@ namespace eosio {
 			    indexed_by< N( bysymbol ), const_mem_fun< token, uint64_t, &token::get_symbol> >,
 		            indexed_by< N( byname ), const_mem_fun< token, uint64_t, &token::get_name> > >;
 
-    	private:
-	    friend eosiosystem::system_contract;
-
-
-        //typedef eosio::multi_index<N(accounts), account> account_index;
-        
-	//typedef eosio::multi_index<N(stat), stats, 
-	//	indexed_by< N( byissuer ), const_mem_func< stats, account_name, &stats::get_issuer> > > currency_index;
-        
-	//typedef eosio::multi_index<N(token), token, 
-	//	indexed_by< N( byowner ), const_mem_func< token, account_name, @token::get_owner> >,
-	//        indexed_by< N( bysymbol ), const_mem_func< token, account_name, @token::get_symbol> > > token_index;
-        
+    private:
+	friend eosiosystem::system_contract;
 
 	token_index tokens;
 
