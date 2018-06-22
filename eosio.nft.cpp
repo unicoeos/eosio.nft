@@ -53,12 +53,6 @@ namespace eosio {
 	eosio_assert( name.size() <= 32, "name has more than 32 bytes" );
 	eosio_assert( name.size() > 0, "name is empty" );
 
-
-	auto nameind = tokens.get_index<N(byname)>();
-	auto nameitr = nameind.find(string_to_name(name.c_str()));
-
-	eosio_assert( nameitr == nameind.end(), "name is already used" );
-
         // Ensure currency has been created
         auto symbol_name = symbol.name();
         currency_index currency_table( _self, symbol_name );
