@@ -85,11 +85,12 @@ public:
       );
    }
 
-   action_result issue( account_name issuer, account_name to, asset quantity, vector<string> uris, string memo ) {
+   action_result issue( account_name issuer, account_name to, asset quantity, vector<string> uris, string name, string memo ) {
       return push_action( issuer, N(issue), mvo()
            ( "to", to)
            ( "quantity", quantity)
 	   ( "uris", uris)
+	   ( "name", name)
            ( "memo", memo)
       );
    }
@@ -157,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE ( issue_multi_tests, nft_tester ) try {
 
       	vector<string> uris = {"uri1", "uri2", "uri3", "uri4", "uri5"};
 
-        issue( N(alice), N(alice), asset::from_string("5 TKN"), uris, "hola" );
+        issue( N(alice), N(alice), asset::from_string("5 TKN"), uris, "nft1", "hola" );
 
 	auto stats = get_stats("0,TKN");
 	REQUIRE_MATCHING_OBJECT( stats, mvo()
@@ -174,6 +175,7 @@ BOOST_FIXTURE_TEST_CASE ( issue_multi_tests, nft_tester ) try {
 			("uri", uris[i])
 			("owner", "alice")
 			("value", "1 TKN")
+			("name", "nft1")
 		);
 	}
 
@@ -193,7 +195,7 @@ BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
 
    vector<string> uris = {"uri"};
 
-   issue( N(alice), N(bob), asset::from_string("1 TKN"), uris, "hola" );
+   issue( N(alice), N(bob), asset::from_string("1 TKN"), uris, "nft1", "hola" );
 
    auto stats = get_stats("0,TKN");
    REQUIRE_MATCHING_OBJECT( stats, mvo()
@@ -207,6 +209,7 @@ BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
       ("uri", "uri")
       ("owner", "bob")
       ("value", "1 TKN")
+      ("name", "nft1")
    );
 
 
@@ -216,11 +219,11 @@ BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
    );
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "to account does not exist" ),
-      issue( N(alice), N(dummy), asset::from_string("1 TKN"), uris, "hola" )
+      issue( N(alice), N(dummy), asset::from_string("1 TKN"), uris, "nft1", "hola" )
    );
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "quantity must be a whole number" ),
-      issue( N(alice), N(alice), asset::from_string("1.05 TKN"), uris, "hola" )
+      issue( N(alice), N(alice), asset::from_string("1.05 TKN"), uris, "nft1", "hola" )
    );
 
    string memo;
@@ -230,32 +233,46 @@ BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
    }
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "memo has more than 256 bytes" ),
-      issue( N(alice), N(alice), asset::from_string("1 TKN"), uris, memo )
+      issue( N(alice), N(alice), asset::from_string("1 TKN"), uris, "nft1", memo )
    );
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "token with symbol does not exist, create token before issue" ),
-      issue( N(alice), N(alice), asset::from_string("1 TTT"), uris, "hole" )
+      issue( N(alice), N(alice), asset::from_string("1 TTT"), uris, "nft1", "hole" )
    );
 
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "must issue positive quantity of NFTs" ),
-      issue( N(alice), N(alice), asset::from_string("-1 TKN"), uris, "hole" )
+      issue( N(alice), N(alice), asset::from_string("-1 TKN"), uris, "nft1", "hole" )
    );
 
 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "mismatch between number of tokens and uris provided" ),
-      issue( N(alice), N(alice), asset::from_string("2 TKN"), uris, "hole" ) 
+      issue( N(alice), N(alice), asset::from_string("2 TKN"), uris, "nft1", "hole" ) 
    );
 
    BOOST_REQUIRE_EQUAL( success(),
-      issue( N(alice), N(alice), asset::from_string("1 TKN"), uris, "hola" )
+      issue( N(alice), N(alice), asset::from_string("1 TKN"), uris, "nft1", "hola" )
    );
 
 
    uris.push_back("uri2");
 
    BOOST_REQUIRE_EQUAL( success(),
-      issue( N(alice), N(alice), asset::from_string("2 TKN"), uris, "hola" )
+      issue( N(alice), N(alice), asset::from_string("2 TKN"), uris, "nft1", "hola" )
+   );
+
+   string name;
+   for(auto i=0; i<10; i++)
+   {
+       name += "nft1";
+   }
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "name has more than 32 bytes" ),
+      issue( N(alice), N(alice), asset::from_string("2 TKN"), uris, name, "hola" )
+   );
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg( "name is empty" ),
+      issue( N(alice), N(alice), asset::from_string("2 TKN"), uris, "", "hola" )
    );
 
 } FC_LOG_AND_RETHROW()
@@ -267,7 +284,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
 
    vector<string> uris = {"uri", "uri2", "uri3"};
 
-   issue( N(alice), N(alice), asset::from_string("3 NFT"), uris, "hola" );
+   issue( N(alice), N(alice), asset::from_string("3 NFT"), uris, "nft1", "hola" );
 
    transfer( N(alice), N(bob), 0, "send token 0 to bob" );
 
@@ -291,6 +308,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
         ("uri", "uri2")
 	("owner", "bob")
 	("value", "1 NFT")
+	("name", "nft1")
    );
    
 
@@ -312,6 +330,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
       	("uri", "uri2")
 	("owner", "carol")
 	("value", "1 NFT")
+	("name", "nft1")
    );
    
    BOOST_REQUIRE_EQUAL( wasm_assert_msg( "sender does not own token with specified ID" ),
@@ -351,7 +370,7 @@ BOOST_FIXTURE_TEST_CASE( burn_tests, nft_tester ) try {
 	
         vector<string> uris = {"uri1", "uri2"};
 
-	issue( N(alice), N(alice), asset::from_string("2 NFT"), uris, "issue 2 tokens" );
+	issue( N(alice), N(alice), asset::from_string("2 NFT"), uris, "nft1", "issue 2 tokens" );
 
 	burn( N(alice), 1);
 
