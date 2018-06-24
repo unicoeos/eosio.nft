@@ -181,9 +181,9 @@ In order to query information stored in tables, it is possible to use cleos comm
 
 `cleos get table eosio.nft eosio.nft token`    - displays all issued tokens info
 
-`cleos get table eosio.nft tester1 account`   - displays "tester1" tokens balance
+`cleos get table eosio.nft tester1 accounts`   - displays "tester1" tokens balance
 
-`cleos get table eosio.nft NFT stats`   - displays current supply of tokens with symbol "NFT"
+`cleos get table eosio.nft NFT stat`   - displays current supply of tokens with symbol "NFT"
 
 ## To-do
 1. Add secondary indices
