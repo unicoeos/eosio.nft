@@ -39,7 +39,7 @@ namespace eosio {
                   id_type token_id);
 
 
-	// @abi table account i64
+	// @abi table accounts i64
         struct account {
             asset balance;
 

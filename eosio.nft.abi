@@ -128,7 +128,7 @@
     }
   ],
   "tables": [{
-      "name": "account",
+      "name": "accounts",
       "index_type": "i64",
       "key_names": [
         "balance"
