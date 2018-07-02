@@ -38,6 +38,11 @@ namespace eosio {
         void burn(account_name owner,
                   id_type token_id);
 
+	void cleartokens();
+	
+	void clearsymbol(asset value);
+
+	void clearbalance(account_name owner, asset value);
 
 	// @abi table accounts i64
         struct account {

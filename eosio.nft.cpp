@@ -163,6 +163,51 @@ namespace eosio {
         sub_supply( burnt_supply );
     }
 
+    // @abi action
+    void nft::cleartokens()
+    {
+	 require_auth(_self);
+
+	 vector<uint64_t> keys;
+	 for(auto it=tokens.begin(); it != tokens.end(); ++it){
+	 
+		keys.push_back(it->id);
+	 }
+
+	 for(auto& key : keys) {
+	 
+	 	auto it = tokens.find(key);
+		if( it != tokens.end()) {
+		
+			tokens.erase(it);
+		}
+	 }
+    }
+
+    // @abi action
+    void nft::clearsymbol(asset value)
+    {
+	require_auth(_self);
+
+	currency_index cur(_self, value.symbol.name());
+	auto it2 = cur.find(value.symbol.name());
+	if(it2 != cur.end()) {
+        	cur.erase(it2);
+        }
+    }
+
+    // @abi action
+    void nft::clearbalance(account_name owner, asset value)
+    {	    
+    	require_auth(_self);
+
+	account_index acc(_self, owner);
+	auto it1 = acc.find(value.symbol.name());
+	if(it1 != acc.end()) {
+		acc.erase(it1);
+	}
+    }
+
     void nft::sub_balance( account_name owner, asset value ) {
         account_index from_acnts( _self, owner );
 
@@ -215,6 +260,6 @@ namespace eosio {
         });
     }
 
-EOSIO_ABI( nft, (create)(issue)(transfer)(burn) )
+EOSIO_ABI( nft, (create)(issue)(transfer)(burn)(cleartokens)(clearsymbol)(clearbalance) )
 
 } /// namespace eosio
