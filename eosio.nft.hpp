@@ -38,6 +38,8 @@ namespace eosio {
         void burn(account_name owner,
                   id_type token_id);
 
+	void setrampayer(account_name payer, id_type id);
+
 	void cleartokens();
 	
 	void clearsymbol(asset value);

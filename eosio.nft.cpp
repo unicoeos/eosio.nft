@@ -140,6 +140,46 @@ namespace eosio {
     }
 
     // @abi action
+    void nft::setrampayer(account_name payer, id_type id)
+    {
+	require_auth(payer);
+	
+	// Ensure token ID exists
+	auto payer_token = tokens.find( id );
+	eosio_assert( payer_token != tokens.end(), "token with specified ID does not exist" );
+	
+	// Ensure payer owns token
+	eosio_assert( payer_token->owner == payer, "payer does not own token with specified ID");
+	
+	const auto& st = *payer_token;	
+	
+	// Notify payer
+	require_recipient( payer );
+	
+	// Set owner as a RAM payer 
+	/*tokens.modify( st, payer, [&]( auto& token ) {
+		token.owner = 0;		
+	});
+
+	tokens.modify( st, payer, [&]( auto& token ) {
+		token.owner = payer;
+	});*/
+
+	tokens.erase(payer_token);
+	tokens.emplace(payer, [&](auto& token){
+		token.id = st.id;
+		token.uri = st.uri;
+		token.owner = st.owner;
+		token.value = st.value;
+		token.name = st.name;
+	});
+	
+
+	sub_balance( payer, st.value );
+	add_balance( payer, st.value, payer );
+    }
+
+    // @abi action
     void nft::burn( account_name owner, id_type token_id )
     {
         require_auth( owner );
@@ -260,6 +300,6 @@ namespace eosio {
         });
     }
 
-EOSIO_ABI( nft, (create)(issue)(transfer)(burn)(cleartokens)(clearsymbol)(clearbalance) )
+EOSIO_ABI( nft, (create)(issue)(transfer)(setrampayer)(burn)(cleartokens)(clearsymbol)(clearbalance) )
 
 } /// namespace eosio
