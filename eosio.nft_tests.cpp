@@ -38,7 +38,7 @@ public:
       const auto& accnt = control->db().get<account_object,by_name>( N(eosio.nft) );
       abi_def abi;
       BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
-      abi_ser.set_abi(abi);
+      abi_ser.set_abi(abi, abi_serializer_max_time);
    }
 
    action_result push_action( const account_name& signer, const action_name &name, const variant_object &data ) {
@@ -47,7 +47,7 @@ public:
       action act;
       act.account = N(eosio.nft);
       act.name    = name;
-      act.data    = abi_ser.variant_to_binary( action_type_name, data );
+      act.data    = abi_ser.variant_to_binary( action_type_name, data, abi_serializer_max_time );
 
       return base_tester::push_action( std::move(act), uint64_t(signer));
    }
@@ -58,7 +58,7 @@ public:
       auto symb = eosio::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
       vector<char> data = get_row_by_account( N(eosio.nft), symbol_code, N(stat), symbol_code );
-      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "stats", data );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "stats", data, abi_serializer_max_time );
    }
 
    fc::variant get_account( account_name acc, const string& symbolname)
@@ -66,14 +66,14 @@ public:
       auto symb = eosio::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
       vector<char> data = get_row_by_account( N(eosio.nft), acc, N(accounts), symbol_code );
-      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "account", data );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "account", data, abi_serializer_max_time );
    }
 
-   fc::variant get_token(account_name acc, id_type token_id) 
+   fc::variant get_token(id_type token_id) 
    {
       vector<char> data = get_row_by_account( N(eosio.nft), N(eosio.nft), N(token), token_id );
       FC_ASSERT(!data.empty(), "empty token");
-      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "token", data );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "token", data, abi_serializer_max_time );
    }
 
    action_result create( account_name issuer,
@@ -169,7 +169,7 @@ BOOST_FIXTURE_TEST_CASE ( issue_multi_tests, nft_tester ) try {
 	for(auto i=0; i<5; i++)
 	{
 		//string indx = to_string(i);
-		auto tokenval = get_token(N(alice), (id_type)i);
+		auto tokenval = get_token((id_type)i);
 		REQUIRE_MATCHING_OBJECT( tokenval, mvo()
 			("id", i)
 			("uri", uris[i])
@@ -203,7 +203,7 @@ BOOST_FIXTURE_TEST_CASE( issue_tests, nft_tester ) try {
       ("issuer", "alice")
    );
 
-   auto tokenval = get_token(N(alice), 0);
+   auto tokenval = get_token(0);
    REQUIRE_MATCHING_OBJECT( tokenval, mvo()
       ("id", "0")
       ("uri", "uri")
@@ -302,7 +302,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
       ("balance", "2 NFT")
    );
 
-   auto tokenval = get_token(N(bob), 1);
+   auto tokenval = get_token(1);
    REQUIRE_MATCHING_OBJECT( tokenval, mvo()
         ("id", "1")
         ("uri", "uri2")
@@ -324,7 +324,7 @@ BOOST_FIXTURE_TEST_CASE( transfer_tests, nft_tester ) try {
         ("balance", "1 NFT")
    );
    
-   auto tokenval_1 = get_token(N(carol), 1);
+   auto tokenval_1 = get_token(1);
    REQUIRE_MATCHING_OBJECT( tokenval_1, mvo()
       	("id", "1")
       	("uri", "uri2")
