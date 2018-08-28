@@ -40,16 +40,10 @@ namespace eosio {
 
 	void setrampayer(account_name payer, id_type id);
 
-#if  _CLEAR_DISABLED_
-	void cleartokens();
-	
-	void clearsymbol(asset value);
-
-	void clearbalance(account_name owner, asset value);
-#endif
 
 	// @abi table accounts i64
         struct account {
+
             asset balance;
 
             uint64_t primary_key() const { return balance.symbol.name(); }

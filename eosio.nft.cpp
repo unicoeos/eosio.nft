@@ -10,9 +10,10 @@ namespace eosio {
 
     // @abi action
     void nft::create( account_name issuer, string sym ) {
-        require_auth( _self );
 
-	// Check if issuer account exists 
+	require_auth( _self );
+
+	// Check if issuer account exists
 	eosio_assert( is_account( issuer ), "issuer account does not exist");
 
         // Valid symbol
@@ -66,7 +67,6 @@ namespace eosio {
         eosio_assert( quantity.amount > 0, "must issue positive quantity of NFTs" );
         eosio_assert( symbol == st.supply.symbol, "symbol precision mismatch" );
 
-
         // Increase supply
 	add_supply( quantity );
 
@@ -97,18 +97,16 @@ namespace eosio {
 
 	// Check memo size and print
         eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
-	    
+
         // Ensure token ID exists
         auto sender_token = tokens.find( id );
         eosio_assert( sender_token != tokens.end(), "token with specified ID does not exist" );
-        
+
 	// Ensure owner owns token
         eosio_assert( sender_token->owner == from, "sender does not own token with specified ID");
-       	
 
 	const auto& st = *sender_token;
 
-	
 	// Notify both recipients
         require_recipient( from );
         require_recipient( to );
@@ -143,22 +141,22 @@ namespace eosio {
     void nft::setrampayer(account_name payer, id_type id)
     {
 	require_auth(payer);
-	
+
 	// Ensure token ID exists
 	auto payer_token = tokens.find( id );
 	eosio_assert( payer_token != tokens.end(), "token with specified ID does not exist" );
-	
+
 	// Ensure payer owns token
 	eosio_assert( payer_token->owner == payer, "payer does not own token with specified ID");
-	
-	const auto& st = *payer_token;	
-	
+
+	const auto& st = *payer_token;
+
 	// Notify payer
 	require_recipient( payer );
-	
-	// Set owner as a RAM payer 
+
+	// Set owner as a RAM payer
 	/*tokens.modify( st, payer, [&]( auto& token ) {
-		token.owner = 0;		
+		token.owner = 0;
 	});
 
 	tokens.modify( st, payer, [&]( auto& token ) {
@@ -173,7 +171,6 @@ namespace eosio {
 		token.value = st.value;
 		token.name = st.name;
 	});
-	
 
 	sub_balance( payer, st.value );
 	add_balance( payer, st.value, payer );
@@ -192,7 +189,6 @@ namespace eosio {
 
 	asset burnt_supply = burn_token->value;
 
-        
 	// Remove token from tokens table
         tokens.erase( burn_token );
 
@@ -203,56 +199,10 @@ namespace eosio {
         sub_supply( burnt_supply );
     }
 
-#if _CLEAR_DISABLED_
-    // @abi action
-    void nft::cleartokens()
-    {
-	 require_auth(_self);
-
-	 vector<uint64_t> keys;
-	 for(auto it=tokens.begin(); it != tokens.end(); ++it){
-	 
-		keys.push_back(it->id);
-	 }
-
-	 for(auto& key : keys) {
-	 
-	 	auto it = tokens.find(key);
-		if( it != tokens.end()) {
-		
-			tokens.erase(it);
-		}
-	 }
-    }
-
-    // @abi action
-    void nft::clearsymbol(asset value)
-    {
-	require_auth(_self);
-
-	currency_index cur(_self, value.symbol.name());
-	auto it2 = cur.find(value.symbol.name());
-	if(it2 != cur.end()) {
-        	cur.erase(it2);
-        }
-    }
-
-    // @abi action
-    void nft::clearbalance(account_name owner, asset value)
-    {	    
-    	require_auth(_self);
-
-	account_index acc(_self, owner);
-	auto it1 = acc.find(value.symbol.name());
-	if(it1 != acc.end()) {
-		acc.erase(it1);
-	}
-    }
-#endif
 
     void nft::sub_balance( account_name owner, asset value ) {
-        account_index from_acnts( _self, owner );
 
+	account_index from_acnts( _self, owner );
         const auto& from = from_acnts.get( value.symbol.name(), "no balance object found" );
         eosio_assert( from.balance.amount >= value.amount, "overdrawn balance" );
 
@@ -302,6 +252,6 @@ namespace eosio {
         });
     }
 
-EOSIO_ABI( nft, (create)(issue)(transfer)(setrampayer)(burn) /*(cleartokens)(clearsymbol)(clearbalance)*/ )
+EOSIO_ABI( nft, (create)(issue)(transfer)(setrampayer)(burn) )
 
 } /// namespace eosio
