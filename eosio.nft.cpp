@@ -203,6 +203,7 @@ namespace eosio {
         sub_supply( burnt_supply );
     }
 
+#if _CLEAR_DISABLED_
     // @abi action
     void nft::cleartokens()
     {
@@ -247,6 +248,7 @@ namespace eosio {
 		acc.erase(it1);
 	}
     }
+#endif
 
     void nft::sub_balance( account_name owner, asset value ) {
         account_index from_acnts( _self, owner );
@@ -300,6 +302,6 @@ namespace eosio {
         });
     }
 
-EOSIO_ABI( nft, (create)(issue)(transfer)(setrampayer)(burn)(cleartokens)(clearsymbol)(clearbalance) )
+EOSIO_ABI( nft, (create)(issue)(transfer)(setrampayer)(burn) /*(cleartokens)(clearsymbol)(clearbalance)*/ )
 
 } /// namespace eosio
