@@ -155,16 +155,7 @@ namespace eosio {
 	require_recipient( payer );
 
 	// Set owner as a RAM payer
-	/*tokens.modify( st, payer, [&]( auto& token ) {
-		token.owner = 0;
-	});
-
-	tokens.modify( st, payer, [&]( auto& token ) {
-		token.owner = payer;
-	});*/
-
-	tokens.erase(payer_token);
-	tokens.emplace(payer, [&](auto& token){
+	tokens.modify(payer_token, payer, [&](auto& token){
 		token.id = st.id;
 		token.uri = st.uri;
 		token.owner = st.owner;
