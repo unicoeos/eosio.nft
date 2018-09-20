@@ -7,6 +7,9 @@
     },{
       "new_type_name": "uri_type",
       "type": "string"
+    },{
+      "new_type_name": "account_name",
+      "type": "name"
     }
   ],
   "structs": [{
@@ -25,7 +28,7 @@
           "type": "asset"
         },{
           "name": "issuer",
-          "type": "name"
+          "type": "account_name"
         }
       ]
     },{
@@ -39,7 +42,7 @@
           "type": "uri_type"
         },{
           "name": "owner",
-          "type": "name"
+          "type": "account_name"
         },{
           "name": "value",
           "type": "asset"
@@ -53,7 +56,7 @@
       "base": "",
       "fields": [{
           "name": "issuer",
-          "type": "name"
+          "type": "account_name"
         },{
           "name": "symbol",
           "type": "string"
@@ -64,7 +67,7 @@
       "base": "",
       "fields": [{
           "name": "to",
-          "type": "name"
+          "type": "account_name"
         },{
           "name": "quantity",
           "type": "asset"
@@ -84,10 +87,10 @@
       "base": "",
       "fields": [{
           "name": "from",
-          "type": "name"
+          "type": "account_name"
         },{
           "name": "to",
-          "type": "name"
+          "type": "account_name"
         },{
           "name": "id",
           "type": "id_type"
@@ -112,7 +115,7 @@
       "base": "",
       "fields": [{
           "name": "payer",
-          "type": "name"
+          "type": "account_name"
         },{
           "name": "id",
           "type": "id_type"

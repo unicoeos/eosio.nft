@@ -58,13 +58,13 @@ namespace eosio {
         auto symbol_name = symbol.name();
         currency_index currency_table( _self, symbol_name );
         auto existing_currency = currency_table.find( symbol_name );
-        eosio_assert( existing_currency != currency_table.end(), "token with symbol does not exist, create token before issue" );
+        eosio_assert( existing_currency != currency_table.end(), "token with symbol does not exist. create token before issue" );
         const auto& st = *existing_currency;
 
         // Ensure have issuer authorization and valid quantity
         require_auth( st.issuer );
         eosio_assert( quantity.is_valid(), "invalid quantity" );
-        eosio_assert( quantity.amount > 0, "must issue positive quantity of NFTs" );
+        eosio_assert( quantity.amount > 0, "must issue positive quantity of NFT" );
         eosio_assert( symbol == st.supply.symbol, "symbol precision mismatch" );
 
         // Increase supply
@@ -154,6 +154,15 @@ namespace eosio {
 	// Notify payer
 	require_recipient( payer );
 
+	/*tokens.erase(payer_token);
+ 	tokens.emplace(payer, [&](auto& token){
+  		token.id = st.id;
+  		token.uri = st.uri;
+  		token.owner = st.owner;
+  		token.value = st.value;
+  		token.name = st.name;
+ 	});*/
+	
 	// Set owner as a RAM payer
 	tokens.modify(payer_token, payer, [&](auto& token){
 		token.id = st.id;
