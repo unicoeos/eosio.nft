@@ -83,6 +83,12 @@ namespace eosio {
                       id_type id,
                       string memo);
 
+	/// @notice Sets owner of the token as a ram payer for stored data.
+	/// @param payer Account name of token owner
+	/// @param id Unique ID of the token to burn
+	void setrampayer(account_name payer, 
+			 id_type id);
+			 
 	/// @notice Burns 1 token with specified "id" owned by account name "owner".
 	/// @param owner Account name of token owner
 	/// @param id Unique ID of the token to burn
