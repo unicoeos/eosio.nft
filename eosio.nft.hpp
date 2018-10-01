@@ -30,9 +30,14 @@ namespace eosio {
 		   string name,
                    string memo);
 
-        void transfer(account_name from,
+        void transferid(account_name from,
                       account_name to,
                       id_type id,
+                      string memo);
+
+	void transfer(account_name from,
+                      account_name to,
+                      asset quantity,
                       string memo);
 
         void burn(account_name owner,
@@ -110,4 +115,5 @@ namespace eosio {
         void sub_supply(asset quantity);
         void add_supply(asset quantity);
     };
+
 } /// namespace eosio
