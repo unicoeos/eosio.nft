@@ -78,11 +78,22 @@ namespace eosio {
 	/// @param to Account name of token receiver
 	/// @param id Unique ID of the token to transfer
 	/// @param memo Action memo (max. 256 bytes)
-        void transfer(account_name from,
+        void transferid(account_name from,
                       account_name to,
                       id_type id,
                       string memo);
 
+	/// Transfers 1 token with specified symbol in asset from account "from" to account "to".
+	/// Throws if amount is not 1, token with specified symbol does not exist, or "from" is not the token owner.
+	/// @param from Account name of token owner
+	/// @param to Account name of token receiver
+	/// @param quantity Asset with 1 token 
+	/// @param memo Action memo (max. 256 bytes)
+	void transfer(account_name from,
+                      account_name to,
+                      asset quantity,
+                      string memo);
+		      
 	/// @notice Sets owner of the token as a ram payer for stored data.
 	/// @param payer Account name of token owner
 	/// @param id Unique ID of the token to burn
@@ -192,7 +203,7 @@ In order to query information stored in tables, it is possible to use cleos comm
 `cleos get table eosio.nft NFT stat`   - displays current supply of tokens with symbol "NFT"
 
 ## To-do
-1. Add secondary indices
+1. Add secondary indices - done
 2. Add approval?
 3. Transfer between contracts
 
