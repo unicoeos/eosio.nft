@@ -1,191 +1,236 @@
 {
-  "version": "eosio::abi/1.0",
-  "types": [{
-      "new_type_name": "id_type",
-      "type": "uint64"
-    },{
-      "new_type_name": "uri_type",
-      "type": "string"
-    },{
-      "new_type_name": "account_name",
-      "type": "name"
-    }
-  ],
-  "structs": [{
-      "name": "create",
-      "base": "",
-      "fields": [{
-          "name": "issuer",
-          "type": "account_name"
-        },{
-          "name": "symbol",
-          "type": "string"
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Nov  9 23:20:43 2018",
+    "version": "eosio::abi/1.1",
+    "structs": [
+        {
+            "name": "account",
+            "base": "",
+            "fields": [
+                {
+                    "name": "balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "burn",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "token_id",
+                    "type": "id_type"
+                }
+            ]
+        },
+        {
+            "name": "create",
+            "base": "",
+            "fields": [
+                {
+                    "name": "issuer",
+                    "type": "name"
+                },
+                {
+                    "name": "symbol",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "issue",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                },
+                {
+                    "name": "uris",
+                    "type": "string[]"
+                },
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "memo",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "setrampayer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "payer",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "id_type"
+                }
+            ]
+        },
+        {
+            "name": "stats",
+            "base": "",
+            "fields": [
+                {
+                    "name": "supply",
+                    "type": "asset"
+                },
+                {
+                    "name": "issuer",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "token",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "uri",
+                    "type": "uri_type"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "value",
+                    "type": "asset"
+                },
+                {
+                    "name": "tokenName",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "transfer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                },
+                {
+                    "name": "memo",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "transferid",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "memo",
+                    "type": "string"
+                }
+            ]
         }
-      ]
-    },{
-      "name": "issue",
-      "base": "",
-      "fields": [{
-          "name": "to",
-          "type": "account_name"
-        },{
-          "name": "quantity",
-          "type": "asset"
-        },{
-          "name": "uris",
-          "type": "string[]"
-        },{
-          "name": "name",
-          "type": "string"
-        },{
-          "name": "memo",
-          "type": "string"
+    ],
+    "types": [
+        {
+            "new_type_name": "id_type",
+            "type": "uint64"
+        },
+        {
+            "new_type_name": "uri_type",
+            "type": "string"
         }
-      ]
-    },{
-      "name": "transferid",
-      "base": "",
-      "fields": [{
-          "name": "from",
-          "type": "account_name"
-        },{
-          "name": "to",
-          "type": "account_name"
-        },{
-          "name": "id",
-          "type": "id_type"
-        },{
-          "name": "memo",
-          "type": "string"
+    ],
+    "actions": [
+        {
+            "name": "burn",
+            "type": "burn",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "create",
+            "type": "create",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "issue",
+            "type": "issue",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setrampayer",
+            "type": "setrampayer",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "transfer",
+            "type": "transfer",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "transferid",
+            "type": "transferid",
+            "ricardian_contract": ""
         }
-      ]
-    },{
-      "name": "transfer",
-      "base": "",
-      "fields": [{
-          "name": "from",
-          "type": "account_name"
-        },{
-          "name": "to",
-          "type": "account_name"
-        },{
-          "name": "quantity",
-          "type": "asset"
-        },{
-          "name": "memo",
-          "type": "string"
+    ],
+    "tables": [
+        {
+            "name": "accounts",
+            "type": "account",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "stat",
+            "type": "stats",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "token",
+            "type": "token",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
         }
-      ]
-    },{
-      "name": "burn",
-      "base": "",
-      "fields": [{
-          "name": "owner",
-          "type": "name"
-        },{
-          "name": "token_id",
-          "type": "id_type"
-        }
-      ]
-    },{
-      "name": "setrampayer",
-      "base": "",
-      "fields": [{
-          "name": "payer",
-          "type": "account_name"
-        },{
-          "name": "id",
-          "type": "id_type"
-        }
-      ]
-    },{
-      "name": "account",
-      "base": "",
-      "fields": [{
-          "name": "balance",
-          "type": "asset"
-        }
-      ]
-    },{
-      "name": "stats",
-      "base": "",
-      "fields": [{
-          "name": "supply",
-          "type": "asset"
-        },{
-          "name": "issuer",
-          "type": "account_name"
-        }
-      ]
-    },{
-      "name": "token",
-      "base": "",
-      "fields": [{
-          "name": "id",
-          "type": "id_type"
-        },{
-          "name": "uri",
-          "type": "uri_type"
-        },{
-          "name": "owner",
-          "type": "account_name"
-        },{
-          "name": "value",
-          "type": "asset"
-        },{
-          "name": "name",
-          "type": "string"
-        }
-      ]
-    }
-  ],
-  "actions": [{
-      "name": "create",
-      "type": "create",
-      "ricardian_contract": ""
-    },{
-      "name": "issue",
-      "type": "issue",
-      "ricardian_contract": ""
-    },{
-      "name": "transferid",
-      "type": "transferid",
-      "ricardian_contract": ""
-    },{
-      "name": "transfer",
-      "type": "transfer",
-      "ricardian_contract": ""
-    },{
-      "name": "burn",
-      "type": "burn",
-      "ricardian_contract": ""
-    },{
-      "name": "setrampayer",
-      "type": "setrampayer",
-      "ricardian_contract": ""
-    }
-  ],
-  "tables": [{
-      "name": "accounts",
-      "type": "account",
-      "index_type": "i64",
-      "key_names" : ["currency"],
-      "key_types" : ["uint64"]
-    },{
-      "name": "stat",
-      "type": "stats",
-      "index_type": "i64",
-      "key_names": [ "currency"],
-      "key_types": [ "uint64" ]
-    },{
-      "name": "token",
-      "type": "token",
-      "index_type": "i64",
-      "key_names": [ "id" ],
-      "key_types": [ "id_type" ]
-    }
-  ],
-  "ricardian_clauses": [],
-  "error_messages": [],
-  "abi_extensions": []
+    ],
+    "ricardian_clauses": [],
+    "variants": [],
+    "abi_extensions": []
 }

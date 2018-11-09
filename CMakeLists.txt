@@ -1,8 +1,7 @@
-file(GLOB ABI_FILES "*.abi")
-configure_file("${ABI_FILES}" "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
+cmake_minimum_required(VERSION 3.5)
+project(eosio.nft VERSION 1.0.0)
 
-add_wast_executable(TARGET eosio.nft
-  INCLUDE_FOLDERS ${STANDARD_INCLUDE_FOLDERS}
-  LIBRARIES libc++ libc eosiolib eosio.nft
-  DESTINATION_FOLDER ${CMAKE_CURRENT_BINARY_DIR}
-)
+find_package(eosio.cdt)
+
+# add contract
+add_contract( eosio.nft eosio.nft eosio.nft.cpp )
