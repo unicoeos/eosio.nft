@@ -144,7 +144,7 @@ CONTRACT nft : public eosio::contract {
 	    string get_name() const { return tokenName; }
 
 	    // generated token global uuid based on token id and
-	    // contract name, passed in the argument
+	    // contract name, passed as argument
 	    uuid get_global_id(name self) const
 	    {
 		uint128_t self_128 = static_cast<uint128_t>(self.value);
