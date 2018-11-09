@@ -32,31 +32,29 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 /// @title eosio.nft public interface
 /// @dev See https://github.com/jafri/eosio.nft/blob/master/README.md
 
-#pragma once
-
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
 #include <string>
+#include <vector>
 
-namespace eosiosystem {
-    class system_contract;
-}
+using namespace eosio;
+using std::string;
+using std::vector;
+typedef uint128_t uuid;
+typedef uint64_t id_type;
+typedef string uri_type;
 
-namespace eosio {
-    using std::string;
-    typedef uint128_t uuid;
-    typedef uint64_t id_type;
-    typedef string uri_type;
-
-    class nft : public contract {
+CONTRACT nft : public eosio::contract {
     public:
-        nft(account_name self) : contract(self), tokens(_self, _self) {}
+        using contract::contract;
+        nft( name receiver, name code, datastream<const char*> ds)
+		: contract(receiver, code, ds), tokens(receiver, receiver.value) {}
 
 	/// Creates token with a symbol name for the specified issuer account.
 	/// Throws if token with specified symbol already exists.
 	/// @param issuer Account name of the token issuer
 	/// @param symbol Symbol code of the token
-        void create(account_name issuer, string symbol);
+        ACTION create(name issuer, std::string symbol);
 
 	/// Issues specified number of tokens with previously created symbol to the account name "to". 
 	/// Each token is generated with an unique token_id assigned to it. Requires authorization from the issuer.
@@ -64,9 +62,9 @@ namespace eosio {
 	/// @param to Account name of tokens receiver
 	/// @param quantity Number of tokens to issue for specified symbol (positive integer number)
 	/// @param uris Vector of URIs for each issued token (size is equal to tokens number)
-	/// @param name Name of issued tokens
+	/// @param name Name of issued tokens (max. 32 bytes)
 	/// @param memo Action memo (max. 256 bytes)
-        void issue(account_name to,
+        ACTION issue(name to,
                    asset quantity,
                    vector<string> uris,
 		   string name,
@@ -78,8 +76,8 @@ namespace eosio {
 	/// @param to Account name of token receiver
 	/// @param id Unique ID of the token to transfer
 	/// @param memo Action memo (max. 256 bytes)
-        void transferid(account_name from,
-                      account_name to,
+        ACTION transferid(name from,
+                      name to,
                       id_type id,
                       string memo);
 
@@ -89,67 +87,67 @@ namespace eosio {
 	/// @param to Account name of token receiver
 	/// @param quantity Asset with 1 token 
 	/// @param memo Action memo (max. 256 bytes)
-	void transfer(account_name from,
-                      account_name to,
+	ACTION transfer(name from,
+                      name to,
                       asset quantity,
                       string memo);
 		      
 	/// @notice Sets owner of the token as a ram payer for stored data.
 	/// @param payer Account name of token owner
 	/// @param id Unique ID of the token to burn
-	void setrampayer(account_name payer, 
-			 id_type id);
+	ACTION burn(name owner,
+                  id_type token_id);
 			 
 	/// @notice Burns 1 token with specified "id" owned by account name "owner".
 	/// @param owner Account name of token owner
 	/// @param id Unique ID of the token to burn
-        void burn(account_name owner,
-                  id_type token_id);
+        ACTION setrampayer(name payer, 
+			   id_type id);
     
     	/// Structure keeps information about the balance of tokens 
 	/// for each symbol that is owned by an account. 
 	/// This structure is stored in the multi_index table.
-        // @abi table accounts i64
-        struct account {
+        TABLE account {
+
             asset balance;
-	    
-            uint64_t primary_key() const { return balance.symbol.name(); }
+
+            uint64_t primary_key() const { return balance.symbol.code().raw(); }
         };
 
 	/// Structure keeps information about the total supply 
 	/// of tokens for each symbol issued by "issue" account. 
 	/// This structure is stored in the multi_index table.
-        // @abi table stat i64
-        struct stats {
+        TABLE stats {
             asset supply;
-            account_name issuer;
+            name issuer;
 
-            uint64_t primary_key() const { return supply.symbol.name(); }
-            account_name get_issuer() const { return issuer; }
+            uint64_t primary_key() const { return supply.symbol.code().raw(); }
+            uint64_t get_issuer() const { return issuer.value; }
         };
 
 	/// Structure keeps information about each issued token.
 	/// Each token is assigned a global unique ID when it is issued. 
 	/// Token also keeps track of its owner, stores assigned URI and its symbol code.    
 	/// This structure is stored in the multi_index table "tokens".
-        // @abi table token i64
-        struct token {
+        TABLE token {
             id_type id;          // Unique 64 bit identifier,
             uri_type uri;        // RFC 3986
-            account_name owner;  // token owner
+            name owner;  	 // token owner
             asset value;         // token value (1 SYS)
-	    string name;	 // token name
+	    string tokenName;	 // token name
 
             id_type primary_key() const { return id; }
-            account_name get_owner() const { return owner; }
+            uint64_t get_owner() const { return owner.value; }
             string get_uri() const { return uri; }
             asset get_value() const { return value; }
-	    uint64_t get_symbol() const { return value.symbol.name(); }
-	    uint64_t get_name() const { return string_to_name(name.c_str()); }
-	    
-	    uuid get_global_id() const
+	    uint64_t get_symbol() const { return value.symbol.code().raw(); }
+	    string get_name() const { return tokenName; }
+
+	    // generated token global uuid based on token id and
+	    // contract name, passed in the argument
+	    uuid get_global_id(name self) const
 	    {
-		uint128_t self_128 = static_cast<uint128_t>(N(_self));
+		uint128_t self_128 = static_cast<uint128_t>(self.value);
 		uint128_t id_128 = static_cast<uint128_t>(id);
 		uint128_t res = (self_128 << 64) | (id_128);
 		return res;
@@ -157,7 +155,7 @@ namespace eosio {
 
 	    string get_unique_name() const
 	    {
-		string unique_name = name + "#" + std::to_string(id);
+		string unique_name = tokenName + "#" + std::to_string(id);
 		return unique_name;
 	    }
         };
@@ -165,15 +163,15 @@ namespace eosio {
 	/// Account balance table
 	/// Primary index:
 	///	owner account name
-	using account_index = eosio::multi_index<N(accounts), account>;
+	using account_index = eosio::multi_index<"accounts"_n, account>;
 
 	/// Issued tokens statistics table
 	/// Primary index:	
 	///	token symbol name
 	/// Secondary indexes:
 	///	issuer account name	
-	using currency_index = eosio::multi_index<N(stat), stats,
-	                       indexed_by< N( byissuer ), const_mem_fun< stats, account_name, &stats::get_issuer> > >;
+	using currency_index = eosio::multi_index<"stat"_n, stats,
+	                       indexed_by< "byissuer"_n, const_mem_fun< stats, uint64_t, &stats::get_issuer> > >;
 
 	/// Issued tokens table
 	/// Primary index:
@@ -181,18 +179,13 @@ namespace eosio {
 	/// Seconday indexes:
 	///	owner account name
 	///	token symbol name
-	///	issued token name
-	using token_index = eosio::multi_index<N(token), token,
-	                    indexed_by< N( byowner ), const_mem_fun< token, account_name, &token::get_owner> >,
-			    indexed_by< N( bysymbol ), const_mem_fun< token, uint64_t, &token::get_symbol> >,
-		            indexed_by< N( byname ), const_mem_fun< token, uint64_t, &token::get_name> > >;
+	using token_index = eosio::multi_index<"token"_n, token,
+	                    indexed_by< "byowner"_n, const_mem_fun< token, uint64_t, &token::get_owner> >,
+			    indexed_by< "bysymbol"_n, const_mem_fun< token, uint64_t, &token::get_symbol> > >;
 			    
     private:
-        friend eosiosystem::system_contract;
-
-	token_index tokens;
-    };
-} /// namespace eosio
+        token_index tokens;
+};
 ```
 In order to query information stored in tables, it is possible to use cleos commands:
 
@@ -211,6 +204,10 @@ or
 display current supply of tokens with symbol "NFT"
 
 `cleos get table eosio.nft NFT stat`
+
+Build command for EOSIO.CDT v1.4.0
+
+`eosio-cpp -o eosio.nft.wasm eosio.nft.cpp --abigen --contract nft`
 
 ## To-do
 1. Add secondary indices - done
