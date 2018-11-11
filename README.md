@@ -1,4 +1,4 @@
-# Update to EOSIO.CDT v1.4.0
+# Updated to EOSIO.CDT v1.4.0
 
 # Non-Fungible Token (NFT) 
 
