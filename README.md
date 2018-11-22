@@ -93,15 +93,15 @@ CONTRACT nft : public eosio::contract {
                       name to,
                       asset quantity,
                       string memo);
-		      
-	/// @notice Sets owner of the token as a ram payer for stored data.
-	/// @param payer Account name of token owner
+
+	/// @notice Burns 1 token with specified "id" owned by account name "owner".
+	/// @param owner Account name of token owner
 	/// @param id Unique ID of the token to burn
 	ACTION burn(name owner,
                   id_type token_id);
-			 
-	/// @notice Burns 1 token with specified "id" owned by account name "owner".
-	/// @param owner Account name of token owner
+
+	/// @notice Sets owner of the token as a ram payer for stored data.
+	/// @param payer Account name of token owner
 	/// @param id Unique ID of the token to burn
         ACTION setrampayer(name payer, 
 			   id_type id);
