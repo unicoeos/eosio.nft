@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
-project(eosio.nft VERSION 1.0.0)
 
-find_package(eosio.cdt)
+add_contract(eosio.nft eosio.nft ${CMAKE_CURRENT_SOURCE_DIR}/eosio.nft.cpp)
+target_include_directories(eosio.nft.wasm
+   PUBLIC
+   ${CMAKE_CURRENT_SOURCE_DIR})
 
-# add contract
-add_contract( eosio.nft eosio.nft eosio.nft.cpp )
+set_target_properties(eosio.nft.wasm
+   PROPERTIES
+   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
