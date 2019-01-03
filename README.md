@@ -211,6 +211,23 @@ Build command for EOSIO.CDT v1.4.0
 
 `eosio-cpp -o eosio.nft.wasm eosio.nft.cpp --abigen --contract nft`
 
+## How to run unit tests
+1. Download the ["eosio.contracts"](https://github.com/EOSIO/eosio.contracts) repository and follow instructions on how to build it.
+2. Clone the **"eosio.nft"** repository into the **"eosio.contracts"** folder
+3. Add the following line to CMakeLists.txt in the **"eosio.contracts"** folder
+```	
+	...
+	add_subdirectory(eosio.token)
+	add_subdirectory(eosio.nft)   <-- add this
+	...
+```	
+4. Copy files (**"contractshpp.hpp.in"** and **"eosio.nft_tests.cpp"**) from the **"eosio.contracts/eosio.nft/tests"** folder to **"eosio.contracts/tests"**
+5. Rebuild the **"eosio.contracts"**
+6. Copy the file **"eosio.nft.abi"** from **"eosio.contracts/eosio.nft"** to **"eosio.contracts/build/eosio.nft"**
+7. Go to the **"eosio.contracts/build/tests"** folder and run the following command
+
+`./unit_test -t eosio_nft_tests`
+
 ## To-do
 1. Add secondary indices - done
 2. Add approval?
